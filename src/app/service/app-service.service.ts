@@ -19,23 +19,25 @@ export class Response {
 // })
 @Injectable()
 export class AppServiceService {
-  rootURL = 'http://localhost:8084/';
+  rootURL = 'http://localhost:8082/';
   appartement: Appartement[] = [];
+  manager: any[] = [];
   selectedAppartementIndex: number;
+  selectedManagerIndex: number;
   constructor(private http: HttpClient, private session: SessionModel, private router: Router) { }
-  logIn(data): Observable<Response> {
-    if (!data.email) {
-      data.email = this.session.getEmail();
-      data.password = this.session.getPassword();
-    }
+  logIn(data): Observable<any> {
+    // if (!data.email) {
+    //   data.email = this.session.getEmail();
+    //   data.password = this.session.getPassword();
+    // }
     data.hashKey = this.session.getHashKey();
     return this.http.post<Response>(`${this.rootURL}login?session=false&login=true`, data).pipe(
       switchMap(res => this.callBack(res, null))
     );
   }
 
-  logOut(): Observable<Response> {
-    return this.http.post<Response>(`${this.rootURL}logout?session=${this.session.getHashKey()}`, {}).pipe(
+  logOut(data): Observable<any> {
+    return this.http.post<Response>(`${this.rootURL}logout?session=${this.session.getHashKey()}`, data).pipe(
       switchMap(res => this.callBack(res, null))
     );
   }
@@ -61,6 +63,23 @@ export class AppServiceService {
       switchMap(res => this.callBack(res, null))
     );
   }
+
+  saveManager(data): Observable<any> {
+    return this.http.post<Response>(`${this.rootURL}saveManager?session=${this.session.getHashKey()}`, data).pipe(
+      switchMap(res => this.callBack(res, null))
+    );
+  }
+
+  getManager(): Observable<any[]> {
+    if (this.manager.length === 0) {
+      return this.http.get<Response>(`${this.rootURL}allManagerDetails?session=${this.session.getHashKey()}`).pipe(
+        switchMap(res => this.callBack(res, 'manager'))
+      );
+    } else {
+      return of(this.manager);
+    }
+  }
+
   callBack(res, key) {
     if (!res.success) {
       // this.a.onShow();

@@ -13,8 +13,8 @@ export class SidenavComponent implements OnInit {
     this.menuItems = [
       new MenuItem({ icon: 'fa-dashboard', name: 'Dashboard', location: 'dashboard', title: 'Dashboard' }),
       new MenuItem({ icon: 'fa-building', name: 'Appartement', location: 'appartement', title: 'Appartement' }),
-      new MenuItem({ icon: 'fa-user', name: 'Manager', location: 'manager', title: 'Manager' }),
-      new MenuItem({ icon: 'fa-users', name: 'Customer', location: 'customer', title: 'Customer' }),
+      new MenuItem({ icon: 'fa-user-secret', name: 'Manager', location: 'manager', title: 'Manager' }),
+      new MenuItem({ icon: 'fa-user', name: 'Tenant/House Owner', location: 'manager', title: 'Tenant/House Owner' }),
     ];
   }
 

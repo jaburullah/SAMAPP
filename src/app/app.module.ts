@@ -9,7 +9,10 @@ import { LayoutComponentModule } from './layout/layout-component.module';
 import {SessionModel} from './model/Session';
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { LoginComponent } from './login/login.component';
+
 import { AppartementComponent } from './appartement/appartement.component';
+import {ManagerComponent} from './manager/manager.component';
+
 import { LayoutComponent } from './layout/layout.component';
 import { DataTablesModule } from 'angular-datatables';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
@@ -18,13 +21,15 @@ import {AppErrorHandler} from './model/ErrorHandler';
 import { SimpleNotificationsModule } from 'angular2-notifications';
 
 import { MaterialModule } from './material.module';
+
 @NgModule({
   declarations: [
     AppComponent,
     DashboardComponent,
     LoginComponent,
+    LayoutComponent,
     AppartementComponent,
-    LayoutComponent
+    ManagerComponent
   ],
   imports: [
     BrowserModule,

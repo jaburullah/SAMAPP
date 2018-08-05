@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {MatCardModule} from '@angular/material/card';
-import { MatButtonModule } from '@angular/material';
+import {MatButtonModule, MatCheckboxModule} from '@angular/material';
 import {MatInputModule} from '@angular/material/input';
 import {MatSelectModule} from '@angular/material/select';
 import {MatRadioModule} from '@angular/material/radio';
@@ -22,7 +22,8 @@ import { MatPaginatorModule, MatProgressSpinnerModule,
     MatPaginatorModule,
     MatSortModule,
     MatProgressSpinnerModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    MatCheckboxModule
   ],
   exports: [
     MatButtonModule,
@@ -35,7 +36,8 @@ import { MatPaginatorModule, MatProgressSpinnerModule,
     MatPaginatorModule,
     MatSortModule,
     MatProgressSpinnerModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    MatCheckboxModule
   ],
 })
 export class MaterialModule { }

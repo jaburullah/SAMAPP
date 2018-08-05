@@ -292,11 +292,11 @@ export class CreateComponent implements OnInit, AfterViewInit {
 
   onSubmitBasicInfo() {
     if (!this.basicInfoForm.valid) {
-      for (const p in this.basicInfoForm.controls) {
-        if (this.basicInfoForm.controls[p].invalid) {
-          console.log(this.basicInfoForm.controls[p]);
-        }
-      }
+      // for (const p in this.basicInfoForm.controls) {
+      //   if (this.basicInfoForm.controls[p].invalid) {
+      //     console.log(this.basicInfoForm.controls[p]);
+      //   }
+      // }
       this.notifyService.info(`Enter basic info`);
       return;
     }

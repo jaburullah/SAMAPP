@@ -1,13 +1,15 @@
+import {el} from '@angular/platform-browser/testing/src/browser_util';
+import {Observable, of} from 'rxjs';
+
 export class SessionModel {
   private _data;
-
+  // private shouldRememberUserNameAndPassword;
   constructor() {
-    if (checkCookie('email')) {
-      this._data = {};
-      this._data.email = getCookie('email');
-      this._data.password = getCookie('password');
-      this._data.hashKey = getCookie('hashKey');
-    }
+    this._data = {};
+    this._data.email = getCookie('email');
+    this._data.password = getCookie('password');
+    this._data.hashKey = getCookie('hashKey');
+    this._data.shouldRememberUserNameAndPassword = getCookie('rememberMe');
   }
 
   isUserLoggedIn() {
@@ -15,9 +17,13 @@ export class SessionModel {
   }
 
   clearSession() {
-    this._data = {};
-    deleteACookie('hashKey');
-    deleteACookie('password');
+    if (this._data.shouldRememberUserNameAndPassword === 'false') {
+      this._data = {};
+      deleteACookie('email');
+      deleteACookie('password');
+      deleteACookie('hashKey');
+      setACookie('rememberMe', false, 2);
+    }
   }
 
   init(data) {
@@ -25,18 +31,26 @@ export class SessionModel {
     setACookie('email', this._data.email, 2);
     setACookie('password', this._data.password, 2);
     setACookie('hashKey', this._data.hashKey, 2);
+    setACookie('rememberMe', this._data.shouldRememberUserNameAndPassword, 2);
   }
 
   getHashKey() {
-    return this._data.hashKey;
+    return this._data && this._data.hashKey || '';
   }
 
   getEmail() {
-    return this._data.email;
+    return this._data && this._data.email || '';
   }
 
   getPassword() {
-    return this._data.password;
+    return this._data && this._data.password || '';
+  }
+
+  getLastVisited() {
+    return this._data.lastVisited;
+  }
+  shouldRememberUserNameAndPassword() {
+    return this._data.shouldRememberUserNameAndPassword;
   }
 }
 

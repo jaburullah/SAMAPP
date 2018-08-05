@@ -28,7 +28,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 /// visit later
 app.use(function (req, res, next) {
-  res.header('Access-Control-Allow-Origin', 'http://localhost:4200');
+  res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
   res.header('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
   res.header('Access-Control-Allow-Credentials', true);
@@ -37,8 +37,11 @@ app.use(function (req, res, next) {
   var isLogin = req.query.login || false;
 
 
-
-  if(!sessionValue){
+  if(req.originalUrl.indexOf('/') >= 0 || req.originalUrl.indexOf('favicon') >= 0){ //favicon
+    // isLogin = true;
+    next();
+  }
+  else if(!sessionValue){
     res.json(utils.jsonResponse(_session[sessionValue],false,{'msg': 'Invalid session'}));
   } else if(_session[sessionValue]) {
     if(_sessionTimeOutCheck(sessionValue)){
@@ -188,7 +191,8 @@ app.post('/login',function(req,res) {
   //fcm.send(fcm.prepareNotification());
 
   var _response = function (sessionValue, status,data) {
-    data.hashKey = sessionValue;
+    // data.hashKey = sessionValue;
+
     res.json(utils.jsonResponse(_session[sessionValue],status,data));
   };
 
@@ -196,9 +200,12 @@ app.post('/login',function(req,res) {
     var sessionValue = req.body.hashKey;
     status = false;
     if(data){
+      var dateDiff = moment(data.lastVisited, 'days').calendar();
+      data.lastVisited = dateDiff;
       if(sessionValue && _session[sessionValue]) {
         if (_sessionTimeOutCheck(sessionValue)) {
           _session[sessionValue].loggedInTime = new Date();
+          data.hashKey = sessionValue;
           _response(sessionValue, true, data);
         }
         else {
@@ -215,6 +222,7 @@ app.post('/login',function(req,res) {
             var newSession = sessionModel(data);
             _session[sessionValue] = newSession;
             _session[sessionValue].loggedInTime = new Date();
+            data.hashKey = sessionValue;
               _response(sessionValue, true, data);
           });
         });
@@ -222,8 +230,8 @@ app.post('/login',function(req,res) {
 
     }
     else {
-      status = false;
-      data = {'msg': 'session expired'};
+      status = true;
+      data = { hashKey : '' };
       _response(sessionValue, status, data)
     }
   });
@@ -231,8 +239,15 @@ app.post('/login',function(req,res) {
 });
 app.post('/logout', function (req, res) {
   var sessionValue = req.query.session;
-  delete _session[sessionValue];
-  res.json(utils.jsonResponse(_session[sessionValue],true,{logout:"success"}));
+  db.logout(req.body, function (status, data) {
+    if (status) {
+      delete _session[sessionValue];
+      res.json(utils.jsonResponse(_session[sessionValue], true, {logout: true}));
+    }
+    else {
+      res.json(utils.jsonResponse(_session[sessionValue], true, {logout: false }));
+    }
+  });
 });
 
 //Appartement
@@ -256,33 +271,8 @@ app.get('/appartementDetails',function(req,res){
 
 //Manager
 app.post('/saveManager',function(req,res){
-    var user = {
-        id:req.body.id,
-        name:req.body.name,
-        email:req.body.email.toLowerCase(),
-        password:req.body.password,
-        mobileNo:req.body.mobileNo,
-        roles:req.body.roles.split(","),
-        appartements:req.body.appartements.split(",")
-    };
-
-    db.saveManager(user,function(status,data){
-        res.json(utils.jsonResponse(_session[sessionValue],status,{}));
-    });
-});
-app.post('/saveManager',function(req,res){
-    var user = {
-        id:req.body.id,
-        name:req.body.name,
-        email:req.body.email,
-        password:req.body.password,
-        mobileNo:req.body.mobileNo,
-        roles:req.body.roles.split(","),
-        appartements:req.body.appartements.split(",")
-    };
-
-    db.saveManager(user,function(status,data){
-        res.json(utils.jsonResponse(_session[sessionValue],status,{}));
+    db.saveManager(req.body,function(status,data){
+        res.json(utils.jsonResponse(_session[sessionValue],status,data));
     });
 });
 app.post('/deleteManager',function(req,res){
@@ -404,6 +394,17 @@ app.get('/allTicketDetails',function(req,res){
     });
 });
 
+
+if(theApp.isProduction){
+  // Serve only the static files form the dist directory
+  app.use(express.static(__dirname + '/dist/SAMAPP'));
+
+  app.get('/*', function(req,res) {
+
+    // res.sendFile(path.join(__dirname+'/dist/SAMAPP/index.html'));
+    res.sendFile(__dirname+'/dist/SAMAPP/index.html');
+  });
+}
 //end server
 //app.listen(theApp.port);
 var http = require('http').Server(app);

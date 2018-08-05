@@ -22,3 +22,7 @@
 .card-login{
   z-index: 10;
 }
+
+.example-full-width{
+  width: 100%;
+}

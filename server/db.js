@@ -16,7 +16,11 @@ module.exports = {
 
     init: function () {
         fcm.init();
-        mongoClient.connect(theApp.mongoDBConnection, function (err, db) {
+        var connection = theApp.mongoDBConnection;
+        if(theApp.isProduction){
+          connection = theApp.mongoDBConnectionProduction;
+        }
+        mongoClient.connect(connection, function (err, db) {
             if (err)
                 console.log(err);
             else {
@@ -29,16 +33,34 @@ module.exports = {
     },
     login: function (obj, callBack) {
         mongoDbObj.db.collection('users', function (err, collection) {
+          collection.update({
+            email: obj.email,
+            password: obj.password
+          }, {$set: {shouldRememberUserNameAndPassword: obj.shouldRememberUserNameAndPassword}}, function (err, items) {
+            if (err) {
+              callBack(false, err);
+            }
             collection.findOne({email: obj.email, password: obj.password}, function (err, items) {
-                if (err) {
-                    callBack(false, err);
-                }
-                callBack(true, items);
+              if (err) {
+                callBack(false, err);
+              }
+              callBack(true, items);
             });
+          });
         });
     },
-    logout: function () {
-
+    logout: function (obj, callBack) {
+      mongoDbObj.db.collection('users', function (err, collection) {
+        collection.update({
+          email: obj.email,
+          password: obj.password
+        }, {$set: {lastVisited: new Date()}}, function (err, items) {
+          if (err) {
+            callBack(false, err);
+          }
+          callBack(true, items);
+        });
+      });
     },
 
     //Mobile Login
@@ -328,31 +350,51 @@ module.exports = {
         });
     },
     saveManager: function (data, callBack) {
-        mongoDbObj.db.collection('users', function (err, collection) {
-            if (data.id) {
-                var id = data.id;
-                delete data.id;
-                collection.update(
-                    {'_id': new mongoDB.ObjectID(id)},
-                    {$set: data},
-                    function (err, items) {
-                        if (err) {
-                            callBack(false, err);
-                        }
-                        callBack(true, items);
+      mongoDbObj.db.collection('users', function (err, collection) {
+        collection.find({ email: data.email}).toArray(function (err, item) {
 
-                    });
-            }
-            else {
-                delete data.id;
-                collection.insert(data, function (err, items) {
-                    if (err) {
-                        callBack(false, err);
-                    }
-                    callBack(true, items);
+          var createOrUpdate = function () {
+            if (data._id) {
+              var id = data._id;
+              delete data._id;
+              collection.update(
+                {'_id': new mongoDB.ObjectID(id)},
+                {$set: data},
+                function (err, items) {
+                  if (err) {
+                    callBack(false, err);
+                  }
+                  callBack(true, { action: true, msg: 'Manager '+data.name +' updated successfully' });
+
                 });
             }
+            else {
+              delete data._id;
+              collection.insert(data, function (err, items) {
+                if (err) {
+                  callBack(false, err);
+                }
+                callBack(true, { action: true, msg: 'Manager '+data.name +' created successfully' });
+              });
+            }
+          };
+          if(item[0]){
+            if(!data._id && (data.email === item[0].email)){
+              callBack(true, { action: false, msg: 'Email already exists, '+ data.email });
+            }
+            else if(data._id !== item[0]._id.toString()) {
+              callBack(true, { action: false, msg: 'Email already exists, '+ data.email });
+            }
+            else {
+              createOrUpdate()
+            }
+          }
+          else {
+            createOrUpdate();
+          }
         });
+      });
+
     },
     deleteManager: function (data, callBack) {
         mongoDbObj.db.collection('users', function (err, collection) {

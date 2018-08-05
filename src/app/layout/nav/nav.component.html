@@ -1,6 +1,6 @@
 <!-- Navigation-->
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top" id="mainNav">
-  <a class="navbar-brand" href="index.html">Welcome</a>
+  <a class="navbar-brand" href="/">Welcome</a>
   <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
     <span class="navbar-toggler-icon"></span>
   </button>
@@ -95,9 +95,16 @@
         </div>
       </form>
     </li>
+      <li class="nav-item">
+        <a class="nav-link">
+          <i class="fa fa-fw fa-sign-out" style="visibility: hidden"></i>
+          <span class="smaller">Last Visited: <span #lastvisted>{{userInfo}}</span></span>
+        </a>
+      </li>
+
     <li class="nav-item" (click)="open(content)">
-      <a class="nav-link" data-toggle="modal" data-target="#exampleModal">
-        <i class="fa fa-fw fa-sign-out"></i>Logout</a>
+      <a class="nav-link" title="Logout" data-toggle="modal" data-target="#exampleModal">
+        <i class="fa fa-fw fa-lg fa-sign-out"></i></a>
     </li>
   </ul>
     <ul class="navbar-nav navbar-sidenav" id="exampleAccordion">

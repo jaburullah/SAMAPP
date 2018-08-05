@@ -5,6 +5,7 @@ import {LoginComponent} from './login/login.component';
 import {DashboardComponent} from './dashboard/dashboard.component';
 import {AppartementComponent} from './appartement/appartement.component';
 import { LayoutComponent} from './layout/layout.component';
+import {ManagerRoutingModule} from './manager/manager.module';
 
 const routes: Routes = [
   { path: '', redirectTo: '/login', pathMatch: 'full' },
@@ -19,7 +20,16 @@ const routes: Routes = [
             path: '',
             loadChildren: './appartement/appartement-routing.module#AppartementRoutingModule'
           }
-        ]},
+        ]
+      },
+      {path: 'manager', component: AppartementComponent,
+        children: [
+          {
+            path: '',
+            loadChildren: './manager/manager.module#ManagerRoutingModule'
+          }
+        ]
+      },
     ]
   },
   { path: '**', redirectTo: '/login'}

@@ -2,10 +2,11 @@
  * Created by jaburur on 21-07-2017.
  */
 var config = {
-    sessionExpiresTime: 5, // minutes
-    port:process.env.PORT || 8084,
+    sessionExpiresTime: 120, // minutes
+    port:process.env.PORT || 8082,
     ip:"localhost",
     mongoDBConnection:"mongodb://localhost:27018/SAMAPP",
+    mongoDBConnectionProduction:"mongodb://jabuadmin:jabu_1989@cluster0-shard-00-00-qpdof.mongodb.net:27017,cluster0-shard-00-01-qpdof.mongodb.net:27017,cluster0-shard-00-02-qpdof.mongodb.net:27017/test?ssl=true&replicaSet=Cluster0-shard-0&authSource=admin&retryWrites=true",
     fcmServerKey:"AAAA41C0U6s:APA91bHdRWhXhNcFKmxM_jYTigjxF4A82XOak3Bt8lIpaKeEFqqoqN1Qjkr8Vxkg3sI8vpMoj70l1OrcXzQKXpRxb9EYEtA3V7Q9MgLHBcUmmS-O6VDaa6jXKd1qEDwJvi4CvcpSSscb",
     appSetting:{
         ticketCategory:{
@@ -157,7 +158,8 @@ var config = {
         }
     },
     secretKey: "SAMAPP_JABU",
-    keySize: 16
+    keySize: 16,
+    isProduction: true
 };
 
 module.exports = config;
