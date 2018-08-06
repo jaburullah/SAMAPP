@@ -20,8 +20,8 @@ export class Response {
 // })
 @Injectable()
 export class AppServiceService {
-  rootURL = 'http://localhost:8084/';
-  // rootURL = 'https://samappartement.herokuapp.com/';
+  // rootURL = 'http://localhost:8084/';
+  rootURL = 'https://samappartement.herokuapp.com/';
   appInfo;
   appartement: Appartement[] = [];
   manager: any[] = [];
