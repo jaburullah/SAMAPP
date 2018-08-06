@@ -288,7 +288,7 @@ var config = {
   },
     secretKey: "SAMAPP_JABU",
     keySize: 16,
-    isProduction: false
+    isProduction: true
 };
 
 module.exports = config;
