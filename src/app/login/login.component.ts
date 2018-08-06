@@ -29,7 +29,7 @@ export class LoginComponent implements OnInit {
     this.loginForm.setValue({
       email: this.session.getEmail(),
       password: this.session.getPassword(),
-      shouldRememberUserNameAndPassword: this.session.getEmail() && true || false
+      shouldRememberUserNameAndPassword: this.session.shouldRememberUserNameAndPassword()
     });
   }
 

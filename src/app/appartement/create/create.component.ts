@@ -305,6 +305,7 @@ export class CreateComponent implements OnInit, AfterViewInit {
     postData.generatorDetails = this.data.generatorDetails;
     postData.liftDetails = this.data.liftDetails;
     this.appService.saveAppartement(postData).subscribe(() => {
+      this.appService.appartement.push(postData);
       this.GeneratorDetailsData = [];
       this.liftDetailsData = [];
       if (this.selectedAppartementIndex >= 0) {

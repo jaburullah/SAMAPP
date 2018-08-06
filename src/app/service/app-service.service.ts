@@ -9,7 +9,7 @@ import {Appartement} from '../model/AppartmentModel';
 export class Response {
   data: {
     msg: string;
-    session: string;
+    // session: string;
   };
   success: boolean;
 }
@@ -19,11 +19,16 @@ export class Response {
 // })
 @Injectable()
 export class AppServiceService {
-  rootURL = 'http://localhost:8082/';
+  rootURL = 'http://localhost:8084/';
+  appInfo;
   appartement: Appartement[] = [];
   manager: any[] = [];
+  tenant: any[] = [];
+  ticket: any[] = [];
   selectedAppartementIndex: number;
   selectedManagerIndex: number;
+  selectedTenantIndex: number;
+  selectedTicketIndex: number;
   constructor(private http: HttpClient, private session: SessionModel, private router: Router) { }
   logIn(data): Observable<any> {
     // if (!data.email) {
@@ -40,6 +45,16 @@ export class AppServiceService {
     return this.http.post<Response>(`${this.rootURL}logout?session=${this.session.getHashKey()}`, data).pipe(
       switchMap(res => this.callBack(res, null))
     );
+  }
+
+  getDashboardDetails(): Observable<any> {
+    if (this.appartement.length === 0) {
+      return this.http.get<Response>(`${this.rootURL}dashboardDetails?session=${this.session.getHashKey()}`).pipe(
+        switchMap(res => this.callBack(res, ''))
+      );
+    } else {
+      return of({});
+    }
   }
 
   saveAppartement(data): Observable<Response> {
@@ -78,6 +93,44 @@ export class AppServiceService {
     } else {
       return of(this.manager);
     }
+  }
+
+  saveTenant(data): Observable<any> {
+    return this.http.post<Response>(`${this.rootURL}saveTenant?session=${this.session.getHashKey()}`, data).pipe(
+      switchMap(res => this.callBack(res, null))
+    );
+  }
+
+  getTenant(): Observable<any[]> {
+    if (this.tenant.length === 0) {
+      return this.http.get<Response>(`${this.rootURL}allTenantDetails?session=${this.session.getHashKey()}`).pipe(
+        switchMap(res => this.callBack(res, 'tenant'))
+      );
+    } else {
+      return of(this.tenant);
+    }
+  }
+
+  saveTicket(data): Observable<any> {
+    return this.http.post<Response>(`${this.rootURL}saveTicket?session=${this.session.getHashKey()}`, data).pipe(
+      switchMap(res => this.callBack(res, null))
+    );
+  }
+
+  getTicket(): Observable<any[]> {
+    if (this.ticket.length === 0) {
+      return this.http.get<Response>(`${this.rootURL}allTickets?session=${this.session.getHashKey()}`).pipe(
+        switchMap(res => this.callBack(res, 'ticket'))
+      );
+    } else {
+      return of(this.ticket);
+    }
+  }
+
+  deleteTicket(data): Observable<Response[]> {
+    return this.http.post<Response>(`${this.rootURL}deleteTicket?session=${this.session.getHashKey()}`, data).pipe(
+      switchMap(res => this.callBack(res, null))
+    );
   }
 
   callBack(res, key) {

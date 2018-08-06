@@ -4,6 +4,8 @@ import {AppServiceService} from '../../service/app-service.service';
 import {Router} from '@angular/router';
 import {SessionModel} from '../../model/Session';
 import {NotificationsService} from 'angular2-notifications';
+import {SidenavComponent} from '../sidenav/sidenav.component';
+import {DashboardComponent} from '../../dashboard/dashboard.component';
 
 @Component({
   selector: 'app-nav',
@@ -15,6 +17,7 @@ export class NavComponent implements OnInit, AfterViewInit {
   closeResult: string;
   userInfo;
   @ViewChild('lastvisted') lastvisted: ElementRef;
+  @ViewChild(SidenavComponent) sideComp: SidenavComponent;
   constructor(private modalService: NgbModal,
               private appService: AppServiceService,
               private route: Router,

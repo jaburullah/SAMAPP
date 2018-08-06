@@ -37,7 +37,7 @@ app.use(function (req, res, next) {
   var isLogin = req.query.login || false;
 
 
-  if(req.originalUrl.indexOf('/') >= 0 || req.originalUrl.indexOf('favicon') >= 0){ //favicon
+  if((req.originalUrl.indexOf('/') >= 0 || req.originalUrl.indexOf('favicon') >= 0) && !sessionValue){ //favicon
     // isLogin = true;
     next();
   }
@@ -137,6 +137,13 @@ app.get('/homeDetails',function(req,res){
     });
 });
 
+// Dashboard
+app.get('/dashboardDetails',function(req,res){
+  db.getDashboardDetails(function(status,data){
+    res.json(utils.jsonResponse(_session,status,data));
+  });
+});
+
 
 //Mobile Login
 app.post('/mobileLogin',function(req,res) {
@@ -200,8 +207,15 @@ app.post('/login',function(req,res) {
     var sessionValue = req.body.hashKey;
     status = false;
     if(data){
-      var dateDiff = moment(data.lastVisited, 'days').calendar();
-      data.lastVisited = dateDiff;
+
+      if(data.lastVisited){
+        var dateDiff = moment(data.lastVisited, 'days').calendar();
+        data.lastVisited = dateDiff;
+      }
+      else {
+        data.lastVisited = 'Now';
+      }
+
       if(sessionValue && _session[sessionValue]) {
         if (_sessionTimeOutCheck(sessionValue)) {
           _session[sessionValue].loggedInTime = new Date();
@@ -289,6 +303,26 @@ app.get('/allManagerDetails',function(req,res){
     });
 });
 
+//Tenant
+app.post('/saveTenant',function(req,res){
+  db.saveTenant(req.body,function(status,data){
+    res.json(utils.jsonResponse(_session[sessionValue],status,data));
+  });
+});
+app.post('/deleteTenant',function(req,res){
+  var user = {
+    id:req.body.id
+  };
+  db.deleteTenant(user,function(status,data){
+    res.json(utils.jsonResponse(_session[sessionValue],status,{}));
+  });
+});
+app.get('/allTenantDetails',function(req,res){
+  db.getAllTenantDetails(function(status,data){
+    res.json(utils.jsonResponse(_session[sessionValue],status,data));
+  });
+});
+
 //User
 app.post('/saveUser',function(req,res){
     var user = {
@@ -335,37 +369,26 @@ app.post('/saveTicket',function(req,res){
      */
 
 
-    var ticket = {
-        //pre declared
-        id:req.body.id,
-        no:new Date().getTime(),
-        // user given
-        category:req.body.category,
-        userID:req.body.userID,
-        apartmentID:req.body.apartmentID,
-        managerID:req.body.managerID,
-        priority:req.body.priority,
-        status:req.body.status,
-        description:req.body.description,
-        createdDate:new Date(req.body.createdDate),
-        modifiedDate:new Date(req.body.createdDate),
-        isManagerAction:req.body.isManagerAction
-    };
-    if(ticket.id){
+    var ticket = req.body;
+    ticket.createdDate = new Date();
+    ticket.modifiedDate = new Date();
+    ticket.isManagerAction = false;
+    ticket.owner = _session[sessionValue].getUserId();
+
+    ticket.no = new Date().getTime();
+
+    if(ticket._id){
         delete ticket.createdDate;
         ticket.modifiedDate =new Date(req.body.modifiedDate);
     }
 
+
     db.saveTicket(ticket,function(status,data){
-        res.json(utils.jsonResponse(_session[sessionValue],status,ticket));
+        res.json(utils.jsonResponse(_session[sessionValue],status,data));
     });
 });
 app.post('/deleteTicket',function(req,res){
-    var ticket = {
-        id:req.body.id
-    };
-
-    db.deleteTicket(ticket,function(status,data){
+    db.deleteTicket(req.body,function(status,data){
         res.json(utils.jsonResponse(_session[sessionValue],status));
     });
 });
@@ -388,11 +411,18 @@ app.post('/managerTicket',function(req,res) {
     });
 });
 
+app.get('/allTickets',function(req,res){
+  db.getAllTicketDetails(function(status,data){
+    res.json(utils.jsonResponse(_session[sessionValue],status,data));
+  });
+});
+
 app.get('/allTicketDetails',function(req,res){
     db.getAllTicketDetails(function(status,data){
         res.json(utils.jsonResponse(_session[sessionValue],status,data));
     });
 });
+
 
 
 if(theApp.isProduction){

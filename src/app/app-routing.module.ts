@@ -6,6 +6,9 @@ import {DashboardComponent} from './dashboard/dashboard.component';
 import {AppartementComponent} from './appartement/appartement.component';
 import { LayoutComponent} from './layout/layout.component';
 import {ManagerRoutingModule} from './manager/manager.module';
+import {ManagerComponent} from './manager/manager.component';
+import {TenantComponent} from './tenant/tenant.component';
+import {TicketComponent} from './ticket/ticket.component';
 
 const routes: Routes = [
   { path: '', redirectTo: '/login', pathMatch: 'full' },
@@ -22,11 +25,27 @@ const routes: Routes = [
           }
         ]
       },
-      {path: 'manager', component: AppartementComponent,
+      {path: 'manager', component: ManagerComponent,
         children: [
           {
             path: '',
             loadChildren: './manager/manager.module#ManagerRoutingModule'
+          }
+        ]
+      },
+      {path: 'tenant', component: TenantComponent,
+        children: [
+          {
+            path: '',
+            loadChildren: './tenant/tenant.module#TenantRoutingModule'
+          }
+        ]
+      },
+      {path: 'ticket', component: TicketComponent,
+        children: [
+          {
+            path: '',
+            loadChildren: './ticket/ticket.module#TicketRoutingModule'
           }
         ]
       },

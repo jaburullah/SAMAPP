@@ -17,6 +17,9 @@ var sessionModel = function(data){
     };
     //_setSessionTimeout();
     return {
+        getUserId: function () {
+          return _data ? (_data._id ? _data._id.toString() : undefined) : undefined;
+        },
         getUserName:function(){
             return _data ? (_data.username ? _data.username : undefined) : undefined;
         },

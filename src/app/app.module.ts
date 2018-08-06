@@ -21,6 +21,8 @@ import {AppErrorHandler} from './model/ErrorHandler';
 import { SimpleNotificationsModule } from 'angular2-notifications';
 
 import { MaterialModule } from './material.module';
+import { TenantComponent } from './tenant/tenant.component';
+import { TicketComponent } from './ticket/ticket.component';
 
 @NgModule({
   declarations: [
@@ -29,7 +31,9 @@ import { MaterialModule } from './material.module';
     LoginComponent,
     LayoutComponent,
     AppartementComponent,
-    ManagerComponent
+    ManagerComponent,
+    TenantComponent,
+    TicketComponent
   ],
   imports: [
     BrowserModule,

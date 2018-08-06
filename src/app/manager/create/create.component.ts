@@ -93,9 +93,11 @@ export class CreateComponent implements OnInit, AfterViewInit {
       return;
     }
     const postData = this.managerInfoForm.value;
+    postData.isDeleted = false;
     postData.roles = ['manager'];
     this.appService.saveManager(postData).subscribe((data) => {
       if (data.action) {
+        this.appService.manager.push(postData);
         this.appartementsPrimary = this.appartements;
         this.appartementsSecondary = this.appartements;
         if (this.selectedManagerIndex >= 0) {

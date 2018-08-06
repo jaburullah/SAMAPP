@@ -10,6 +10,7 @@ export class SessionModel {
     this._data.password = getCookie('password');
     this._data.hashKey = getCookie('hashKey');
     this._data.shouldRememberUserNameAndPassword = getCookie('rememberMe');
+    console.log(document.cookie);
   }
 
   isUserLoggedIn() {
@@ -17,13 +18,10 @@ export class SessionModel {
   }
 
   clearSession() {
-    if (this._data.shouldRememberUserNameAndPassword === 'false') {
-      this._data = {};
-      deleteACookie('email');
-      deleteACookie('password');
-      deleteACookie('hashKey');
-      setACookie('rememberMe', false, 2);
+    if (!this._data.shouldRememberUserNameAndPassword) {
+      deleteCookies();
     }
+    // this._data = {};
   }
 
   init(data) {
@@ -49,8 +47,22 @@ export class SessionModel {
   getLastVisited() {
     return this._data.lastVisited;
   }
+
   shouldRememberUserNameAndPassword() {
-    return this._data.shouldRememberUserNameAndPassword;
+    if (this._data.shouldRememberUserNameAndPassword === 'false') {
+      return false;
+    }
+    return this._data.shouldRememberUserNameAndPassword || false;
+  }
+
+  isAdmin() {
+    return this._data.roles.indexOf('admin') >= 0;
+  }
+  isManager() {
+    return this._data.roles.indexOf('manager') >= 0;
+  }
+  isTenant() {
+    return this._data.roles.indexOf('tenant') >= 0;
   }
 }
 
@@ -58,7 +70,7 @@ function setCookie(cname, cvalue, exdays) {
   const d = new Date();
   d.setTime(d.getTime() + (exdays * 1000 * 60 * 60 * 24));
   const expires = 'expires=' + d.toUTCString();
-  window.document.cookie = cname + '=' + cvalue + '; ' + expires;
+  window.document.cookie = cname + '=' + cvalue + '; ' + expires + '; path=/' ;
 }
 
 function getCookie(cname) {
@@ -73,12 +85,16 @@ function getCookie(cname) {
   return '';
 }
 
+function deleteCookies() {
+  const cArr = window.document.cookie.split(';');
+  for (let i = 0; i < cArr.length; i++) {
+    deleteCookie(cArr[i]);
+  }
+}
+
 function deleteCookie(cname) {
   const d = new Date();
-  d.setTime(d.getTime() - (1000 * 60 * 60 * 24));
-  const expires = 'expires=' + d.toUTCString();
-  window.document.cookie = cname + '=' + '; ' + expires;
-
+  window.document.cookie = cname + '=;expires=Thu, 01 Jan 1970 00:00:01 GMT;';
 }
 
 function checkCookie(cname) {
