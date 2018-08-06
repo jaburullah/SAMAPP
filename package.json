@@ -3,21 +3,14 @@
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
-    "start": "node server.js",
-    "postinstall": "ng build --prod --build-optimizer",
+    "start": "ng serve",
     "build": "ng build",
     "test": "ng test",
     "lint": "ng lint",
     "e2e": "ng e2e"
   },
-  "engines": {
-    "node": "8.11.3",
-    "npm": "6.2.0"
-  },
   "private": true,
   "dependencies": {
-    "@angular/cli": "~6.0.8",
-    "@angular/compiler-cli": "^6.0.3",
     "@angular/animations": "^6.1.0",
     "@angular/cdk": "^6.4.1",
     "@angular/common": "^6.0.3",

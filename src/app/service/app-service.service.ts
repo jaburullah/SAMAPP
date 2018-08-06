@@ -5,6 +5,7 @@ import {SessionModel} from '../model/Session';
 import {switchMap, tap} from 'rxjs/internal/operators';
 import {Router} from '@angular/router';
 import {Appartement} from '../model/AppartmentModel';
+import {environment} from '../../environments/environment.prod';
 
 export class Response {
   data: {
@@ -19,7 +20,8 @@ export class Response {
 // })
 @Injectable()
 export class AppServiceService {
-  rootURL = 'http://localhost:8084/';
+  // rootURL = 'http://localhost:8084/';
+  rootURL = 'https://samappartement.herokuapp.com/';
   appInfo;
   appartement: Appartement[] = [];
   manager: any[] = [];
@@ -29,7 +31,8 @@ export class AppServiceService {
   selectedManagerIndex: number;
   selectedTenantIndex: number;
   selectedTicketIndex: number;
-  constructor(private http: HttpClient, private session: SessionModel, private router: Router) { }
+  constructor(private http: HttpClient, private session: SessionModel, private router: Router) {
+    }
   logIn(data): Observable<any> {
     // if (!data.email) {
     //   data.email = this.session.getEmail();
