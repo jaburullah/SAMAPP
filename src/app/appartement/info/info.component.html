@@ -12,7 +12,7 @@
         <div class="card-body">
           <div class="row">
             <div class="col-xl-3 col-sm-6 mb-3">
-              <div class="row-content" *ngFor="let manager of data.primaryManagers">
+              <div class="row-content" *ngFor="let manager of primaryManagers">
                 <div class="row">
                   <mat-card-subtitle> <b>Name:</b> {{manager.name}}</mat-card-subtitle>
                 </div>
@@ -40,7 +40,7 @@
         <div class="card-body">
           <div class="row">
             <div class="col-xl-3 col-sm-6 mb-3">
-              <div class="row-content" *ngFor="let manager of data.secondaryManagers">
+              <div class="row-content" *ngFor="let manager of secondaryManagers">
                 <div class="row">
                   <mat-card-subtitle> <b>Name:</b> {{manager.name}}</mat-card-subtitle>
                 </div>

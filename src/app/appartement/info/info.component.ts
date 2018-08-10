@@ -15,8 +15,8 @@ export class InfoComponent implements OnInit {
   GeneratorDetailsData: GeneratorDetails[] = [];
   liftDetailsData: LiftDetails[] = [];
   data;
-  primaryAppartement = [];
-  secondaryAppartement = [];
+  primaryManagers = [];
+  secondaryManagers = [];
   constructor(private session: SessionModel, private appService: AppServiceService) {
     this.data = {};
   }
@@ -27,8 +27,8 @@ export class InfoComponent implements OnInit {
       console.log(data);
       this.GeneratorDetailsData = data[0].generatorDetails;
       this.liftDetailsData = data[0].liftDetails;
-      this.primaryAppartement = data[0].primaryAppartements || [];
-      this.secondaryAppartement = data[0].secondaryAppartements || [];
+      this.primaryManagers = data[0].primaryManagers || [];
+      this.secondaryManagers = data[0].secondaryManagers || [];
       this.data = data[0];
       // if (this.session.isAdmin()) {
       // this.appartementGrid = new MatTableDataSource<Appartement>(data); // new MatTableDataSource<Response>(data);
