@@ -37,7 +37,7 @@ export class AppServiceService {
     // if (true) {
       this.rootURL = document.location.origin + '/';
     // } else {
-    //   this.rootURL = 'http://localhost:8084/';
+      this.rootURL = 'http://localhost:8084/';
     // }
     console.log(document.location.origin);
   }
