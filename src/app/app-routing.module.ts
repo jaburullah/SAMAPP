@@ -9,6 +9,7 @@ import {ManagerRoutingModule} from './manager/manager.module';
 import {ManagerComponent} from './manager/manager.component';
 import {TenantComponent} from './tenant/tenant.component';
 import {TicketComponent} from './ticket/ticket.component';
+import {AuthenticationResolve} from './service/Authentication';
 
 const routes: Routes = [
   { path: '', redirectTo: '/login', pathMatch: 'full' },
@@ -49,7 +50,10 @@ const routes: Routes = [
           }
         ]
       },
-    ]
+    ],
+    resolve: {
+      data: AuthenticationResolve,
+    }
   },
   { path: '**', redirectTo: '/login'}
 ];

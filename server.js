@@ -9,7 +9,7 @@ var app = express();
 
 var _sessionTimeOutCheck = function (sessionValue) {
   var howManyMinutes = moment().diff(_session[sessionValue].loggedInTime, 'minutes');
-  console.log(_session,"Minutes Ago: " + howManyMinutes);
+  console.log(_session[sessionValue].getEmail(),"Minutes Ago: " + howManyMinutes);
   if(howManyMinutes >  theApp.sessionExpiresTime){
     return false;
   }
@@ -17,7 +17,21 @@ var _sessionTimeOutCheck = function (sessionValue) {
     return true;
   }
 };
-
+function logErrors (err, req, res, next) {
+  console.error(err.stack);
+  next(err)
+}
+function clientErrorHandler (err, req, res, next) {
+  if (req.xhr) {
+    res.status(500).send({ error: 'Something failed!' })
+  } else {
+    next(err)
+  }
+}
+function errorHandler (err, req, res, next) {
+  res.status(500);
+  res.render('error', { error: err })
+}
 var sessionValue = null;
 //Public enable folder
 app.use(express.static(__dirname +'/web'));
@@ -25,6 +39,9 @@ app.use(express.static(__dirname +'/web'));
 app.use(bodyParser.json());
 //support parsing of application/x-www-form-urlencoded post data
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(logErrors);
+app.use(clientErrorHandler);
+app.use(errorHandler);
 
 /// visit later
 app.use(function (req, res, next) {
@@ -42,7 +59,9 @@ app.use(function (req, res, next) {
     next();
   }
   else if(!sessionValue){
+    _session[sessionValue] = '';
     res.json(utils.jsonResponse(_session[sessionValue],false,{'msg': 'Invalid session'}));
+
   } else if(_session[sessionValue]) {
     if(_sessionTimeOutCheck(sessionValue)){
       _session[sessionValue].loggedInTime = new Date();
@@ -58,6 +77,7 @@ app.use(function (req, res, next) {
       next();
     }
     else{
+      _session[sessionValue] = '';
       res.json(utils.jsonResponse(_session[sessionValue],false,{'msg': 'Invalid session'}));
     }
   }
@@ -75,7 +95,16 @@ var fo = require('./server/file.js');
 var sessionModel = require('./server/session.js');
 var _session =  {};
 var utils = require('./server/utils.js');
-
+var _sessionCheck = function (req, res) {
+  var sessionValue = req.query.session;
+  if(!sessionValue && !_session[sessionValue]){
+    var status = true;
+    var data = {'msg': 'Invalid session'};
+    res.json(utils.jsonResponse(_session,status,data));
+    return false;
+  }
+  return sessionValue;
+};
 
 // routes will go here
 // start the server
@@ -138,10 +167,14 @@ app.get('/homeDetails',function(req,res){
 });
 
 // Dashboard
-app.get('/dashboardDetails',function(req,res){
-  db.getDashboardDetails(function(status,data){
-    res.json(utils.jsonResponse(_session,status,data));
-  });
+app.get('/dashboardDetails',function(req,res) {
+  var sessionValue = _sessionCheck(req, res);
+  if(sessionValue){
+    db.getDashboardDetails(function (status, data) {
+      res.json(utils.jsonResponse(_session, status, data));
+    }, _session[sessionValue]);
+  }
+
 });
 
 
@@ -245,9 +278,10 @@ app.post('/login',function(req,res) {
     }
     else {
       status = true;
-      data = { hashKey : '' };
+      data = {'msg': 'Invalid username and password'};
       _response(sessionValue, status, data)
     }
+    db.setSession(_session[sessionValue]);
   });
 
 });
@@ -261,66 +295,87 @@ app.post('/logout', function (req, res) {
     else {
       res.json(utils.jsonResponse(_session[sessionValue], true, {logout: false }));
     }
-  });
+  }, _session[sessionValue]);
 });
 
 //Appartement
-app.post('/saveAppartement',function(req,res){
-    var appartement = req.body;
+app.post('/saveAppartement',function(req,res) {
+  var sessionValue = _sessionCheck(req, res);
+  if(sessionValue){
+    db.saveAppartement(req.body, function (status, data) {
+      res.json(utils.jsonResponse(_session[sessionValue], status, data));
+    }, _session[sessionValue]);
+  }
+});
 
-    db.saveAppartement(appartement,function(status,data){
-        res.json(utils.jsonResponse(_session[sessionValue],status,data));
-    });
+app.post('/deleteAppartement',function(req,res) {
+  var sessionValue = _sessionCheck(req, res);
+  if(sessionValue){
+    db.deleteAppartement(req.body, function (status, data) {
+      res.json(utils.jsonResponse(_session[sessionValue], status, {}));
+    }, _session[sessionValue]);
+  }
 });
-app.post('/deleteAppartement',function(req,res){
-    db.deleteAppartement(req.body,function(status,data){
-        res.json(utils.jsonResponse(_session[sessionValue],status,{}));
-    });
-});
+
 app.get('/appartementDetails',function(req,res){
-    db.getAppartmentDetails(function(status,data){
+  var sessionValue = _sessionCheck(req, res);
+    if(sessionValue){
+      db.getAppartmentDetails(function(status,data){
         res.json(utils.jsonResponse(_session[sessionValue],status,data));
-    });
+      }, _session[sessionValue]);
+    }
 });
 
 //Manager
 app.post('/saveManager',function(req,res){
-    db.saveManager(req.body,function(status,data){
+  var sessionValue = _sessionCheck(req, res);
+    if(sessionValue){
+      db.saveManager(req.body,function(status,data){
         res.json(utils.jsonResponse(_session[sessionValue],status,data));
-    });
+      }, _session[sessionValue]);
+    }
 });
 app.post('/deleteManager',function(req,res){
-    var user = {
-        id:req.body.id
-    };
-    db.deleteManager(user,function(status,data){
+  var sessionValue = _sessionCheck(req, res);
+    if(sessionValue){
+      db.deleteManager(req.body,function(status,data){
         res.json(utils.jsonResponse(_session[sessionValue],status,{}));
-    });
+      }, _session[sessionValue]);
+    }
 });
 app.get('/allManagerDetails',function(req,res){
-    db.getAllManagerDetails(function(status,data){
+  var sessionValue = _sessionCheck(req, res);
+    if(sessionValue){
+      db.getAllManagerDetails(function(status,data){
         res.json(utils.jsonResponse(_session[sessionValue],status,data));
-    });
+      }, _session[sessionValue]);
+    }
 });
 
 //Tenant
 app.post('/saveTenant',function(req,res){
-  db.saveTenant(req.body,function(status,data){
-    res.json(utils.jsonResponse(_session[sessionValue],status,data));
-  });
+  var sessionValue = _sessionCheck(req, res);
+  if(sessionValue){
+    db.saveTenant(req.body,function(status,data){
+      res.json(utils.jsonResponse(_session[sessionValue],status,data));
+    }, _session[sessionValue]);
+  }
 });
 app.post('/deleteTenant',function(req,res){
-  var user = {
-    id:req.body.id
-  };
-  db.deleteTenant(user,function(status,data){
-    res.json(utils.jsonResponse(_session[sessionValue],status,{}));
-  });
+  var sessionValue = _sessionCheck(req, res);
+  if(sessionValue){
+    db.deleteTenant(req.body,function(status,data){
+      res.json(utils.jsonResponse(_session[sessionValue],status,data));
+    }, _session[sessionValue]);
+  }
 });
 app.get('/allTenantDetails',function(req,res){
-  db.getAllTenantDetails(function(status,data){
-    res.json(utils.jsonResponse(_session[sessionValue],status,data));
-  });
+  var sessionValue = _sessionCheck(req, res);
+  if(sessionValue){
+    db.getAllTenantDetails(function(status,data){
+      res.json(utils.jsonResponse(_session[sessionValue],status,data));
+    }, _session[sessionValue]);
+  }
 });
 
 //User
@@ -367,7 +422,7 @@ app.post('/saveTicket',function(req,res){
      Status: Open, InProgress, Closed, Reopen,
      Summary:
      */
-
+  var sessionValue = _sessionCheck(req, res);
 
     var ticket = req.body;
     ticket.createdDate = new Date();
@@ -383,14 +438,19 @@ app.post('/saveTicket',function(req,res){
     }
 
 
-    db.saveTicket(ticket,function(status,data){
+    if(sessionValue){
+      db.saveTicket(ticket,function(status,data){
         res.json(utils.jsonResponse(_session[sessionValue],status,data));
-    });
+      }, _session[sessionValue]);
+    }
 });
 app.post('/deleteTicket',function(req,res){
-    db.deleteTicket(req.body,function(status,data){
+  var sessionValue = _sessionCheck(req, res);
+    if(sessionValue){
+      db.deleteTicket(req.body,function(status,data){
         res.json(utils.jsonResponse(_session[sessionValue],status));
-    });
+      }, _session[sessionValue]);
+    }
 });
 app.post('/userTicket',function(req,res) {
     var userID = req.body.userID;
@@ -412,15 +472,21 @@ app.post('/managerTicket',function(req,res) {
 });
 
 app.get('/allTickets',function(req,res){
-  db.getAllTicketDetails(function(status,data){
-    res.json(utils.jsonResponse(_session[sessionValue],status,data));
-  });
+  var sessionValue = _sessionCheck(req, res);
+  if(sessionValue){
+    db.getAllTicketDetails(function(status,data){
+      res.json(utils.jsonResponse(_session[sessionValue],status,data));
+    }, _session[sessionValue]);
+  }
 });
 
 app.get('/allTicketDetails',function(req,res){
-    db.getAllTicketDetails(function(status,data){
+  var sessionValue = _sessionCheck(req, res);
+    if(sessionValue){
+      db.getAllTicketDetails(function(status,data){
         res.json(utils.jsonResponse(_session[sessionValue],status,data));
-    });
+      }, _session[sessionValue]);
+    }
 });
 
 

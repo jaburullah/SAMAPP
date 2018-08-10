@@ -4,6 +4,7 @@ import {AppServiceService, Response} from '../../service/app-service.service';
 import {Appartement} from '../../model/AppartmentModel';
 import {MatPaginator, MatTableDataSource} from '@angular/material';
 import {NgbModal} from '@ng-bootstrap/ng-bootstrap';
+import {SessionModel} from '../../model/Session';
 @Component({
   selector: 'app-manage',
   templateUrl: './manage.component.html',
@@ -11,16 +12,26 @@ import {NgbModal} from '@ng-bootstrap/ng-bootstrap';
 })
 export class ManageComponent implements OnInit {
 
-  displayedColumns: string[] = ['sno', 'name', 'noOfHouses', 'address', 'manager', 'email', 'contact', 'action'];
+  displayedColumns: string[] = ['sno', 'name', 'noOfHouses', 'address', 'email', 'contact', 'action'];
   // appartementGrid: Response[] = [];
   appartementGrid = new MatTableDataSource<Appartement>(null);
   @ViewChild(MatPaginator) paginator: MatPaginator;
-  constructor(private router: Router, private appService: AppServiceService) { }
+  hasSession = false;
+  sessionM;
+  constructor(private router: Router, private appService: AppServiceService, private session: SessionModel) {
+    this.sessionM = this.session;
+  }
 
   ngOnInit() {
     this.appService.getAppartement().subscribe((data) => {
-      this.appartementGrid = new MatTableDataSource<Appartement>(data); // new MatTableDataSource<Response>(data);
-      this.appartementGrid.paginator = this.paginator;
+      // if (this.session.isAdmin()) {
+        this.appartementGrid = new MatTableDataSource<Appartement>(data); // new MatTableDataSource<Response>(data);
+        this.appartementGrid.paginator = this.paginator;
+      // } else if (this.session.isManager()) {
+      //   const appt = data.primary.concat(data.secondary);
+      //   this.appartementGrid = new MatTableDataSource<Appartement>(appt); // new MatTableDataSource<Response>(data);
+      //   this.appartementGrid.paginator = this.paginator;
+      // }
     });
   }
 

@@ -5,6 +5,7 @@ import {AppServiceService} from '../../service/app-service.service';
 import {NotificationsService} from 'angular2-notifications';
 import {bufferCount} from 'rxjs/internal/operators';
 import {NgbModal, NgbModalRef} from '@ng-bootstrap/ng-bootstrap';
+import {SessionModel} from '../../model/Session';
 
 export class GeneratorInfo {
   _data: any;
@@ -143,13 +144,19 @@ export class CreateComponent implements OnInit, AfterViewInit {
   selectedAppartementIndex = -1;
   confirmDialog: NgbModalRef;
   errors;
-
+  sessionM;
+  @ViewChild('basicinfoform') basicinfoform;
+  @ViewChild('generatorform') generatorform;
+  @ViewChild('liftform') liftform;
   @ViewChild('actionbutton', {read: ElementRef}) button: ElementRef;
   @ViewChild('appartementdelete', {read: ElementRef}) dialog: ElementRef;
   constructor(private modalService: NgbModal,
               private router: Router, private appService: AppServiceService,
               private notifyService: NotificationsService,
-              private fb: FormBuilder) { }
+              private fb: FormBuilder,
+              private session: SessionModel) {
+    this.sessionM = this.session;
+  }
 
   ngOnInit() {
     this.data = {
@@ -256,7 +263,8 @@ export class CreateComponent implements OnInit, AfterViewInit {
       newGenerator.push(this.data.generatorDetails[i]);
     }
     this.GeneratorDetailsData = newGenerator;
-    this.generatorDetailsForm.reset();
+    // this.generatorDetailsForm.reset();
+    this.generatorform.resetForm();
   }
 
   onDeleteGeneratorDetails(index) {
@@ -278,7 +286,8 @@ export class CreateComponent implements OnInit, AfterViewInit {
       newLift.push(this.data.liftDetails[i]);
     }
     this.liftDetailsData = newLift;
-    this.liftDetailsForm.reset();
+    // this.liftDetailsForm.reset();
+    this.liftform.resetForm();
   }
 
   onDeleteLiftDetails(index) {
@@ -301,11 +310,12 @@ export class CreateComponent implements OnInit, AfterViewInit {
       return;
     }
     const postData = this.basicInfoForm.value;
-    this.basicInfoForm.reset();
+    postData.isDeleted = false;
+    // this.basicInfoForm.reset();
+    this.basicinfoform.resetForm();
     postData.generatorDetails = this.data.generatorDetails;
     postData.liftDetails = this.data.liftDetails;
-    this.appService.saveAppartement(postData).subscribe(() => {
-      this.appService.appartement.push(postData);
+    this.appService.saveAppartement(postData).subscribe((data) => {
       this.GeneratorDetailsData = [];
       this.liftDetailsData = [];
       if (this.selectedAppartementIndex >= 0) {
@@ -315,6 +325,8 @@ export class CreateComponent implements OnInit, AfterViewInit {
         this.button.nativeElement.textContent = 'Save';
         this.notifyService.success(`Appartment ${postData.name} updated successfully`);
       } else {
+        postData._id = data._id;
+        this.appService.appartement.push(postData);
         this.notifyService.success(`Appartment ${postData.name} created successfully`);
       }
     });
@@ -337,7 +349,7 @@ export class CreateComponent implements OnInit, AfterViewInit {
       this.appService.appartement.splice(this.selectedAppartementIndex, 1);
       this.notifyService.success(`Appartment ${postData.name} deleted successfully`);
       this.confirmDialog.dismiss();
-      this.basicInfoForm.reset();
+      this.basicinfoform.resetForm();
       this.GeneratorDetailsData = [];
       this.liftDetailsData = [];
       this.appService.selectedAppartementIndex = -1;

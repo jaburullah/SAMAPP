@@ -4,6 +4,7 @@ import { RouterModule, Routes } from '@angular/router';
 import { ManageComponent} from './manage/manage.component';
 import { CreateComponent } from './create/create.component';
 import {TicketLayoutRoutes} from './ticket.routing';
+import {InfoComponent} from './info/info.component';
 
 import { ReactiveFormsModule } from '@angular/forms';
 
@@ -47,7 +48,8 @@ import {
   ],
   declarations: [
     ManageComponent,
-    CreateComponent
+    CreateComponent,
+    InfoComponent
   ]
 })
 export class TicketRoutingModule {}

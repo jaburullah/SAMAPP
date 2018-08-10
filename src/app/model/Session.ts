@@ -3,13 +3,16 @@ import {Observable, of} from 'rxjs';
 
 export class SessionModel {
   private _data;
+  hasSession;
   // private shouldRememberUserNameAndPassword;
   constructor() {
+    this.hasSession = false;
     this._data = {};
     this._data.email = getCookie('email');
     this._data.password = getCookie('password');
     this._data.hashKey = getCookie('hashKey');
     this._data.shouldRememberUserNameAndPassword = getCookie('rememberMe');
+    this._data.roles = [];
     console.log(document.cookie);
   }
 
@@ -18,6 +21,7 @@ export class SessionModel {
   }
 
   clearSession() {
+    this.hasSession = false;
     if (!this._data.shouldRememberUserNameAndPassword) {
       deleteCookies();
     }
@@ -26,6 +30,7 @@ export class SessionModel {
 
   init(data) {
     this._data = data;
+    this.hasSession = true;
     setACookie('email', this._data.email, 2);
     setACookie('password', this._data.password, 2);
     setACookie('hashKey', this._data.hashKey, 2);
@@ -34,6 +39,10 @@ export class SessionModel {
 
   getHashKey() {
     return this._data && this._data.hashKey || '';
+  }
+
+  getUserId() {
+    return this._data._id;
   }
 
   getEmail() {
@@ -63,6 +72,9 @@ export class SessionModel {
   }
   isTenant() {
     return this._data.roles.indexOf('tenant') >= 0;
+  }
+  getAppartement() {
+    return this._data.appartement;
   }
 }
 

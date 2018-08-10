@@ -3,6 +3,7 @@ import {MatPaginator, MatTableDataSource} from '@angular/material';
 import {AppServiceService} from '../../service/app-service.service';
 import {ManagerModel} from '../../model/ManagerModel';
 import {Router} from '@angular/router';
+import {SessionModel} from '../../model/Session';
 
 @Component({
   selector: 'app-manage',
@@ -15,7 +16,10 @@ export class ManageComponent implements OnInit {
   // appartementGrid: Response[] = [];
   managerGrid = new MatTableDataSource<ManagerModel>(null);
   @ViewChild(MatPaginator) paginator: MatPaginator;
-  constructor(private router: Router, private appService: AppServiceService) { }
+  hasSession = false;
+  constructor(private router: Router, private appService: AppServiceService, private session: SessionModel) {
+    this.hasSession = this.session.hasSession;
+  }
 
   ngOnInit() {
     this.appService.getManager().subscribe((data) => {

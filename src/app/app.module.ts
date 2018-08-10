@@ -19,10 +19,11 @@ import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import { AppServiceService} from './service/app-service.service';
 import {AppErrorHandler} from './model/ErrorHandler';
 import { SimpleNotificationsModule } from 'angular2-notifications';
-
+import {AuthenticationResolve} from './service/Authentication';
 import { MaterialModule } from './material.module';
 import { TenantComponent } from './tenant/tenant.component';
 import { TicketComponent } from './ticket/ticket.component';
+import { MomentModule } from 'angular2-moment';
 
 @NgModule({
   declarations: [
@@ -37,6 +38,7 @@ import { TicketComponent } from './ticket/ticket.component';
   ],
   imports: [
     BrowserModule,
+    MomentModule,
     NgbModule.forRoot(),
     AppRoutingModule,
     HttpClientModule,
@@ -49,6 +51,7 @@ import { TicketComponent } from './ticket/ticket.component';
   ],
   providers: [
     { provide: ErrorHandler, useClass: AppErrorHandler },
+    { provide: AuthenticationResolve, useClass: AuthenticationResolve },
     { provide: SessionModel, useClass: SessionModel },
     { provide: AppServiceService, useClass: AppServiceService }
   ],

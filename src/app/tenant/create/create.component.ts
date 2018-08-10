@@ -70,7 +70,7 @@ export class CreateComponent implements OnInit, AfterViewInit {
   }
   onSubmitBasicInfo() {
     if (!this.tenantInfoForm.valid) {
-      this.notifyService.warn(`Error`, 'Enter tenant/ house owner info');
+      this.notifyService.warn(`Error`, 'Enter Customer info');
       return;
     }
     const postData = this.tenantInfoForm.value;
@@ -78,12 +78,14 @@ export class CreateComponent implements OnInit, AfterViewInit {
     postData.isDeleted = false;
     this.appService.saveTenant(postData).subscribe((data) => {
       if (data.action) {
-        this.appService.tenant.push(postData);
         if (this.selectedTenantIndex >= 0) {
           this.appService.tenant.splice(this.selectedTenantIndex, 1, postData);
           this.appService.selectedTenantIndex = -1;
           this.selectedTenantIndex = -1;
           this.button.nativeElement.textContent = 'Save';
+        } else {
+          postData._id = data._id;
+          this.appService.tenant.push(postData);
         }
         this.tenantform.resetForm();
         this.notifyService.success('Info', data.msg);
@@ -101,21 +103,21 @@ export class CreateComponent implements OnInit, AfterViewInit {
   }
 
   onClickDelete(appartementDelete) {
-    // this.confirmDialog = this.modalService.open(appartementDelete, {ariaLabelledBy: 'modal-basic-title'});
+    this.confirmDialog = this.modalService.open(appartementDelete, {ariaLabelledBy: 'modal-basic-title'});
   }
 
   onClickOk() {
-    // const postData = this.basicInfoForm.value;
-    // postData.roules = ['manager'];
-    // this.appService.deleteAppartement(postData).subscribe((data) => {
-    //   this.appService.appartement.splice(this.selectedTenantIndex, 1);
-    //   this.notifyService.success(`Tenant ${postData.name} deleted successfully`);
-    //   this.confirmDialog.dismiss();
-    //   this.basicInfoForm.reset();
-    //   this.appService.selectedAppartementIndex = -1;
-    //   this.selectedTenantIndex = -1;
-    //   // this.button.nativeElement.textContent = 'Save';
-    // });
+    const postData = this.tenantInfoForm.value;
+    postData.roules = ['manager'];
+    this.appService.deleteTenant(postData).subscribe((data) => {
+      this.appService.tenant.splice(this.selectedTenantIndex, 1);
+      this.notifyService.success(`Customer ${postData.name} deleted successfully`);
+      this.confirmDialog.dismiss();
+      this.tenantform.reset();
+      this.appService.selectedAppartementIndex = -1;
+      this.selectedTenantIndex = -1;
+      this.button.nativeElement.textContent = 'Save';
+    });
   }
 
 }

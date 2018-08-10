@@ -1,8 +1,8 @@
-<div class="card mb-3">
+<div class="card mb-3" >
   <div class="card-header">
     <i class="fa fa-building"></i> Manage Appartement
     <button mat-raised-button type="button" color="primary" class="btn btn-primary pull-right mr-2"
-    (click)="onClickCreate()">Create Appartement</button>
+    (click)="onClickCreate()" *ngIf="sessionM.isAdmin()">Create Appartement</button>
   </div>
   <div class="card-body">
     <div class="example-container">
@@ -37,10 +37,10 @@
         </ng-container>
 
         <!-- Manager Column -->
-        <ng-container matColumnDef="manager">
-          <th mat-header-cell *matHeaderCellDef> Manager </th>
-          <td mat-cell *matCellDef="let element"> {{ element.Manager || 'No Manager' }} </td>
-        </ng-container>
+        <!--<ng-container matColumnDef="manager">-->
+          <!--<th mat-header-cell *matHeaderCellDef> Manager </th>-->
+          <!--<td mat-cell *matCellDef="let element"> {{ element.Manager || 'No Manager' }} </td>-->
+        <!--</ng-container>-->
 
         <!-- Group/President email Id Column -->
         <ng-container matColumnDef="email">

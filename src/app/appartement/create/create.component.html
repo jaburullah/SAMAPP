@@ -1,6 +1,6 @@
 <div class="main-content">
   <div class="container-fluid">
-    <form [formGroup]="basicInfoForm" novalidate (ngSubmit)="onSubmitBasicInfo()">
+    <form [formGroup]="basicInfoForm" #basicinfoform="ngForm" novalidate (ngSubmit)="onSubmitBasicInfo()">
     <div class="row">
       <div class="col-md-12">
         <div class="card">
@@ -135,10 +135,10 @@
                                       <mat-card-subtitle>Cost: {{element.amcDetails.cost}}</mat-card-subtitle>
                                     </div>
                                     <div class="row">
-                                      <mat-card-subtitle>Service Due Date: {{element.amcDetails.serviceDueDate}}</mat-card-subtitle>
+                                      <mat-card-subtitle>Service Due Date: {{element.amcDetails.serviceDueDate | date:"dd/MM/yyyy"}}</mat-card-subtitle>
                                     </div>
                                     <div class="row">
-                                      <mat-card-subtitle>Expiry Date: {{element.amcDetails.expiryDate}}</mat-card-subtitle>
+                                      <mat-card-subtitle>Expiry Date: {{element.amcDetails.expiryDate | date:"dd/MM/yyyy"}}</mat-card-subtitle>
                                     </div>
                                   </div>
                                 </mat-expansion-panel>
@@ -160,7 +160,7 @@
                         <mat-card>
                           <mat-card-content>
                             <div class="container-fluid">
-                              <form [formGroup]="generatorDetailsForm" novalidate (ngSubmit)="onSubmitGenerator()">
+                              <form [formGroup]="generatorDetailsForm" novalidate #generatorform="ngForm" (ngSubmit)="onSubmitGenerator()">
                                 <div class="row">
                                   <div class="col-md-12">
                                       <div class="row">
@@ -305,10 +305,10 @@
                                       <mat-card-subtitle>Cost: {{element.amcDetails.cost}}</mat-card-subtitle>
                                     </div>
                                     <div class="row">
-                                      <mat-card-subtitle>Service Due Date: {{element.amcDetails.serviceDueDate}}</mat-card-subtitle>
+                                      <mat-card-subtitle>Service Due Date: {{element.amcDetails.serviceDueDate | date:"dd/MM/yyyy"}}</mat-card-subtitle>
                                     </div>
                                     <div class="row">
-                                      <mat-card-subtitle>Expiry Date: {{element.amcDetails.expiryDate}}</mat-card-subtitle>
+                                      <mat-card-subtitle>Expiry Date: {{element.amcDetails.expiryDate | date:"dd/MM/yyyy"}}</mat-card-subtitle>
                                     </div>
                                   </div>
                                 </mat-expansion-panel>
@@ -330,7 +330,7 @@
                         <mat-card>
                           <mat-card-content>
                             <div class="container-fluid">
-                              <form [formGroup]="liftDetailsForm" novalidate (ngSubmit)="onSubmitLift()">
+                              <form [formGroup]="liftDetailsForm" #liftform="ngForm" novalidate (ngSubmit)="onSubmitLift()">
                                 <div class="row">
                                 <div class="col-md-12">
                                   <div class="row">
@@ -488,7 +488,7 @@
           </div>
           <div class="card-footer">
             <button mat-raised-button type="button" class="btn btn-secondary pull-right mr-2" (click)="onClickBack()">Back</button>
-            <button mat-raised-button type="button" *ngIf="selectedAppartementIndex >= 0" color="warn" class="btn btn-primary pull-right mr-2" (click)="onClickDelete(appartementdelete)">Delete</button>
+            <button mat-raised-button type="button" *ngIf="selectedAppartementIndex >= 0 && !sessionM.isManager()" color="warn" class="btn btn-primary pull-right mr-2" (click)="onClickDelete(appartementdelete)">Delete</button>
             <button mat-raised-button #actionbutton color="primary" type="submit" class="btn btn-primary pull-right mr-2">Save</button>
           </div>
         </div>

@@ -7,6 +7,8 @@ import {Router} from '@angular/router';
 import {Appartement} from '../model/AppartmentModel';
 import {environment} from '../../environments/environment.prod';
 
+// import 'rxjs/add/operator/toPromise';
+
 export class Response {
   data: {
     msg: string;
@@ -20,8 +22,8 @@ export class Response {
 // })
 @Injectable()
 export class AppServiceService {
-  // rootURL = 'http://localhost:8084/';
-  rootURL = 'https://samappartement.herokuapp.com/';
+  rootURL = 'http://localhost:8084/';
+  // rootURL = 'https://samappartement.herokuapp.com/';
   appInfo;
   appartement: Appartement[] = [];
   manager: any[] = [];
@@ -33,6 +35,17 @@ export class AppServiceService {
   selectedTicketIndex: number;
   constructor(private http: HttpClient, private session: SessionModel, private router: Router) {
     }
+  isAuthenticated(data): Observable<any> {
+    // if (!data.email) {
+    //   data.email = this.session.getEmail();
+    //   data.password = this.session.getPassword();
+    // }
+    data.hashKey = this.session.getHashKey();
+    return this.http.post<Response>(`${this.rootURL}login?session=false&login=true`, data).pipe(
+      switchMap(res => this.callBack(res, null))
+    );
+  }
+
   logIn(data): Observable<any> {
     // if (!data.email) {
     //   data.email = this.session.getEmail();
@@ -51,25 +64,32 @@ export class AppServiceService {
   }
 
   getDashboardDetails(): Observable<any> {
-    if (this.appartement.length === 0) {
+    // if (this.appartement.length === 0) {
       return this.http.get<Response>(`${this.rootURL}dashboardDetails?session=${this.session.getHashKey()}`).pipe(
         switchMap(res => this.callBack(res, ''))
       );
-    } else {
-      return of({});
-    }
+    //
+    // } else {
+    //   return of({});
+    // }
   }
 
-  saveAppartement(data): Observable<Response> {
+  saveAppartement(data): Observable<any> {
     return this.http.post<Response>(`${this.rootURL}saveAppartement?session=${this.session.getHashKey()}`, data).pipe(
       switchMap(res => this.callBack(res, null))
     );
   }
 
-  getAppartement(): Observable<Appartement[]> {
+  getAppartement(): Observable<any> {
     if (this.appartement.length === 0) {
-      return this.http.get<Response>(`${this.rootURL}appartementDetails?session=${this.session.getHashKey()}`).pipe(
-        switchMap(res => this.callBack(res, 'appartement'))
+      return this.http.get<any>(`${this.rootURL}appartementDetails?session=${this.session.getHashKey()}`).pipe(
+        switchMap((res) => {
+          if (this.session.isManager()) {
+            const primary = res.data.primary || [];
+            res.data = primary.concat(res.data.secondary || []);
+          }
+          return this.callBack(res, 'appartement');
+        })
       );
     } else {
       return of(this.appartement);
@@ -98,6 +118,12 @@ export class AppServiceService {
     }
   }
 
+  deleteManager(data): Observable<Response[]> {
+    return this.http.post<Response>(`${this.rootURL}deleteManager?session=${this.session.getHashKey()}`, data).pipe(
+      switchMap(res => this.callBack(res, null))
+    );
+  }
+
   saveTenant(data): Observable<any> {
     return this.http.post<Response>(`${this.rootURL}saveTenant?session=${this.session.getHashKey()}`, data).pipe(
       switchMap(res => this.callBack(res, null))
@@ -112,6 +138,12 @@ export class AppServiceService {
     } else {
       return of(this.tenant);
     }
+  }
+
+  deleteTenant(data): Observable<Response[]> {
+    return this.http.post<Response>(`${this.rootURL}deleteTenant?session=${this.session.getHashKey()}`, data).pipe(
+      switchMap(res => this.callBack(res, null))
+    );
   }
 
   saveTicket(data): Observable<any> {

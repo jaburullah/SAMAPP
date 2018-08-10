@@ -9,9 +9,16 @@ var Q = require('q');
 var Promise = require('promise');
 var theApp = require('./app.js');
 var fcm = require('./fcmNotification.js');
-
-
-
+var sendGrill = require('./sendGrillEmail.js');
+var moment = require('moment');
+var _session = null;
+var _getMId = function (arr) {
+  var rArr = [];
+  for( var i = 0 ; i < arr.length; i++){
+    rArr.push(new mongoDB.ObjectID(arr[i]))
+  }
+  return rArr;
+};
 module.exports = {
 
   init: function () {
@@ -31,7 +38,11 @@ module.exports = {
       }
     });
   },
+  setSession: function (session) {
+    _session = session;
+  },
   login: function (obj, callBack) {
+    var $self = this;
     mongoDbObj.db.collection('users', function (err, collection) {
       collection.update({
         email: obj.email,
@@ -51,15 +62,19 @@ module.exports = {
               priority: theApp.appWebSetting.ticketPriority,
               status: theApp.appWebSetting.ticketStatus
             };
+            var logData = {
+              msg: '<strong>'+items.name +"</strong> logged in",
+              user: items._id.toString()
+            };
+            $self.writeLogs(logData);
           }
-
-
           callBack(true, items);
         });
       });
     });
   },
-  logout: function (obj, callBack) {
+  logout: function (obj, callBack,_session) {
+    var $self = this;
     mongoDbObj.db.collection('users', function (err, collection) {
       collection.update({
         email: obj.email,
@@ -68,6 +83,11 @@ module.exports = {
         if (err) {
           callBack(false, err);
         }
+        var logData = {
+          msg: '<strong>'+_session.getName() +"</strong> logged out",
+          user: _session.getUserId()
+        };
+        $self.writeLogs(logData);
         callBack(true, items);
       });
     });
@@ -250,17 +270,104 @@ module.exports = {
     });
   },
   //Appartment
-  getAppartmentDetails: function (callBack) {
+  getAppartmentDetails: function (callBack, _session) {
+
+
     mongoDbObj.db.collection('appartements', function (err, collection) {
-      collection.find({"isDeleted": false}).toArray(function (err, items) {
-        if (err) {
-          callBack(false, err);
-        }
-        callBack(true, items);
-      });
+      if (_session.isManager()) {
+        var primaryAppartement = _getMId(_session.getPrimaryAppartement());
+        var secondaryAppartement = _getMId(_session.getSecondaryAppartement());
+
+        var primary = new Promise(function (resolve, reject) {
+          collection.find({
+            _id: {$in: primaryAppartement}, "isDeleted": false
+          }).toArray(function (err, items) {
+            if (err) {
+              reject(err);
+            }
+            /// got recent tickets here
+            resolve(items);
+          });
+        });
+        var secondary = new Promise(function (resolve, reject) {
+          collection.find({
+            _id: {$in: secondaryAppartement}, "isDeleted": false
+          }).toArray(function (err, items) {
+            if (err) {
+              reject(err);
+            }
+            /// got recent tickets here
+            resolve(items);
+          });
+        });
+        Promise.all([primary, secondary])
+          .done(function (results) {
+            var res = {
+              primary: results[0],
+              secondary: results[1]
+            };
+            callBack(true, res);
+          });
+      }
+      else if(_session.isTenant()){
+        collection.find({"isDeleted": false, _id: new mongoDB.ObjectID(_session.getAppartement()) }).toArray(function (err, items) {
+          if (err) {
+            callBack(false, err);
+          }
+
+          var primaryManagers = new Promise(function (resolve, reject) {
+            mongoDbObj.db.collection('users', function (err, collection) {
+              collection.find(
+                {
+                  "roles": { $in: ['manager']}, "isDeleted": false,
+                  primaryAppartements: { $in: [items[0]._id.toString()]}
+                }
+              ).toArray(function (err, items) {
+                if (err) {
+                  reject(err);
+                }
+                /// got all open tickets here
+                resolve(items)
+              });
+            });
+          });
+          var secondaryManagers = new Promise(function (resolve, reject) {
+            mongoDbObj.db.collection('users', function (err, collection) {
+              collection.find(
+                {
+                  "roles": { $in: ['manager']}, "isDeleted": false,
+                  secondaryAppartements: { $in: [items[0]._id.toString()]}
+                }
+              ).toArray(function (err, items) {
+                if (err) {
+                  reject(err);
+                }
+                /// got all open tickets here
+                resolve(items)
+              });
+            });
+          });
+          Promise.all([primaryManagers, secondaryManagers])
+            .done(function (results) {
+              items[0].primaryManagers = results[0];
+              items[0].secondaryManagers = results[1];
+
+              callBack(true, items);
+            });
+        });
+      }
+      else {
+        collection.find({"isDeleted": false}).toArray(function (err, items) {
+          if (err) {
+            callBack(false, err);
+          }
+          callBack(true, items);
+        });
+      }
     });
   },
-  saveAppartement: function (data, callBack) {
+  saveAppartement: function (data, callBack,_session) {
+    var $self = this;
     mongoDbObj.db.collection('appartements', function (err, collection) {
       if (data._id) {
         var id = data._id;
@@ -272,6 +379,11 @@ module.exports = {
             if (err) {
               callBack(false, err);
             }
+            var logData = {
+              msg: '<strong>'+ data.name +"</strong> is updated, by "+ _session.getName(),
+              user: _session.getUserId()
+            };
+            $self.writeLogs(logData);
             callBack(true, items);
 
           });
@@ -282,18 +394,29 @@ module.exports = {
           if (err) {
             callBack(false, err);
           }
-          callBack(true, items.ops[0]);
+          var logData = {
+            msg: '<strong>'+ data.name +"</strong> is created, by "+ _session.getName(),
+            user: _session.getUserId()
+          };
+          $self.writeLogs(logData);
+          callBack(true, { _id: items.ops[0]._id.toString()});
         });
       }
     });
   },
-  deleteAppartement: function (data, callBack) {
+  deleteAppartement: function (data, callBack,_session) {
+    var $self = this;
     mongoDbObj.db.collection('appartements', function (err, collection) {
       collection.update(
         {'_id': new mongoDB.ObjectID(data._id)}, {$set: {"isDeleted": true}}, function (err, items) {
           if (err) {
             callBack(false, err);
           }
+          var logData = {
+            msg: '<strong>'+ data.name +"</strong> is deleted, by "+ _session.getName(),
+            user: _session.getUserId()
+          };
+          $self.writeLogs(logData);
           callBack(true, items);
         });
     });
@@ -311,6 +434,7 @@ module.exports = {
     });
   },
   saveUser: function (data, callBack) {
+    var $self = this;
     mongoDbObj.db.collection('users', function (err, collection) {
       if (data.id) {
         var id = data.id;
@@ -350,7 +474,7 @@ module.exports = {
 
 
   //Manager
-  getAllManagerDetails: function (callBack) {
+  getAllManagerDetails: function (callBack, _session) {
     mongoDbObj.db.collection('users', function (err, collection) {
       collection.find({roles: {$in: ["manager"]}, 'isDeleted': false}).toArray(function (err, items) {
         if (err) {
@@ -360,9 +484,10 @@ module.exports = {
       });
     });
   },
-  saveManager: function (data, callBack) {
+  saveManager: function (data, callBack, _session) {
+    var $self = this;
     mongoDbObj.db.collection('users', function (err, collection) {
-      collection.find({email: data.email}).toArray(function (err, item) {
+      collection.find({email: data.email, isDeleted: false}).toArray(function (err, item) {
 
         var createOrUpdate = function () {
           if (data._id) {
@@ -375,6 +500,11 @@ module.exports = {
                 if (err) {
                   callBack(false, err);
                 }
+                var logData = {
+                  msg: '<strong>'+ data.name +"</strong> is created, by "+ _session.getName(),
+                  user: _session.getUserId()
+                };
+                $self.writeLogs(logData);
                 callBack(true, {action: true, msg: 'Manager ' + data.name + ' updated successfully'});
 
               });
@@ -385,7 +515,13 @@ module.exports = {
               if (err) {
                 callBack(false, err);
               }
-              callBack(true, {action: true, msg: 'Manager ' + data.name + ' created successfully'});
+              var logData = {
+                msg: '<strong>'+ data.name +"</strong> is updated, by "+ _session.getName(),
+                user: _session.getUserId()
+              };
+              sendGrill().sendNewUserMail(data);
+              $self.writeLogs(logData);
+              callBack(true, {action: true, msg: 'Manager ' + data.name + ' created successfully',_id: items.ops[0]._id.toString()});
             });
           }
         };
@@ -407,20 +543,26 @@ module.exports = {
     });
 
   },
-  deleteManager: function (data, callBack) {
+  deleteManager: function (data, callBack, _session) {
+    var $self = this;
     mongoDbObj.db.collection('users', function (err, collection) {
       collection.update(
         {'_id': new mongoDB.ObjectID(data._id)}, {$set: {"isDeleted": true}}, function (err, items) {
           if (err) {
             callBack(false, err);
           }
+          var logData = {
+            msg: '<strong>'+ data.name +"</strong> is deleted, by "+ _session.getName(),
+            user: _session.getUserId()
+          };
+          $self.writeLogs(logData);
           callBack(true, {action: true, msg: 'Manager ' + data.name + ' deleted successfully'});
         });
     });
   },
 
   //Tenant
-  getAllTenantDetails: function (callBack) {
+  getAllTenantDetails: function (callBack, _session) {
     mongoDbObj.db.collection('users', function (err, collection) {
       collection.find({roles: {$in: ["tenant"]}, 'isDeleted': false}).toArray(function (err, items) {
         if (err) {
@@ -430,9 +572,10 @@ module.exports = {
       });
     });
   },
-  saveTenant: function (data, callBack) {
+  saveTenant: function (data, callBack, _session) {
+    var $self = this;
     mongoDbObj.db.collection('users', function (err, collection) {
-      collection.find({email: data.email}).toArray(function (err, item) {
+      collection.find({email: data.email, isDeleted: false}).toArray(function (err, item) {
 
         var createOrUpdate = function () {
           if (data._id) {
@@ -445,6 +588,11 @@ module.exports = {
                 if (err) {
                   callBack(false, err);
                 }
+                var logData = {
+                  msg: data.name +" is updated, by "+ _session.getName(),
+                  user: _session.getUserId()
+                };
+                $self.writeLogs(logData);
                 callBack(true, {action: true, msg: 'Tenant/House Owner ' + data.name + ' updated successfully'});
 
               });
@@ -455,7 +603,14 @@ module.exports = {
               if (err) {
                 callBack(false, err);
               }
-              callBack(true, {action: true, msg: 'Tenant/House Owner ' + data.name + ' created successfully'});
+              var logData = {
+                msg: data.name +" is created, by "+ _session.getName(),
+                user: _session.getUserId()
+              };
+              sendGrill().sendNewUserMail(data);
+              $self.writeLogs(logData);
+              console.log(items.ops[0]._id.toString());
+              callBack(true, {action: true, msg: 'Tenant/House Owner ' + data.name + ' created successfully' , _id: items.ops[0]._id.toString()});
             });
           }
         };
@@ -477,13 +632,19 @@ module.exports = {
     });
 
   },
-  deleteTenant: function (data, callBack) {
+  deleteTenant: function (data, callBack, _session) {
+    var $self = this;
     mongoDbObj.db.collection('users', function (err, collection) {
       collection.update(
         {'_id': new mongoDB.ObjectID(data._id)}, {$set: {"isDeleted": true}}, function (err, items) {
           if (err) {
             callBack(false, err);
           }
+          var logData = {
+            msg: data.name +" is deleted, by "+ _session.getName(),
+            user: _session.getUserId()
+          };
+          $self.writeLogs(logData);
           callBack(true, {action: true, msg: 'Tenant/House owner ' + data.name + ' deleted successfully'});
         });
     });
@@ -614,7 +775,7 @@ module.exports = {
   },
 
 
-  saveTicket: function (data, callBack) {
+  saveTicket: function (data, callBack, _session) {
     var $this = this;
     mongoDbObj.db.collection('tickets', function (err, collection) {
       if (data._id) {
@@ -630,6 +791,13 @@ module.exports = {
             data.id = id;
             data.isNewTicket = false;
             $this.sendNotification(data);
+            var logData = {
+              msg: 'Ticket No:'+data.no +" is updated, by "+ _session.getName(),
+              user: _session.getUserId()
+            };
+            sendGrill().sendUpdateTicketMail(data);
+            sendGrill().sendUpdateTicketMail(data);
+            $this.writeLogs(logData);
             callBack(true, {action: true, msg: 'Ticket No: ' + data.no + ', updated successfully', data: data});
           });
       }
@@ -641,28 +809,57 @@ module.exports = {
           }
           data._id = items.ops[0]._id;
           data.isNewTicket = true;
-          // $this.sendNotification(data);
+          $this.sendNotification(data);
+          var logData = {
+            msg: 'Ticket No:'+data.no +" is created, by "+ _session.getName(),
+            user: _session.getUserId()
+          };
+          sendGrill().sendNewTicketMailToCustomer(data);
+          sendGrill().sendNewTicketMailToManager(data);
+          $this.writeLogs(logData);
           // callBack(true, data);
           callBack(true, {action: true, msg: 'Ticket No: ' + data.no + ', create successfully', data: data});
         });
       }
     });
   },
-
-  deleteTicket: function (data, callBack) {
+  deleteTicket: function (data, callBack, _session) {
+    var $this = this;
     mongoDbObj.db.collection('tickets', function (err, collection) {
       collection.update(
         {'_id': new mongoDB.ObjectID(data._id)}, {$set: {"isDeleted": true}}, function (err, items) {
           if (err) {
             callBack(false, err);
           }
+          var logData = {
+            msg: 'Ticket No:'+data.no +" is deleted, by "+ _session.getName(),
+            user: _session.getUserId()
+          };
+          $this.writeLogs(logData);
           callBack(true, items);
         });
     });
   },
-  getAllTicketDetails: function (callBack) {
+  getAllTicketDetails: function (callBack, _session) {
     mongoDbObj.db.collection('tickets', function (err, collection) {
-      collection.find({"isDeleted": false}).sort({"createdDate": -1}).toArray(function (err, items) {
+      var filerObj ={
+        "isDeleted": false
+      };
+      if(_session.isManager()){
+        var appartetement = _session.getPrimaryAppartement().concat(_session.getSecondaryAppartement());
+        var appartetementFilter = [];
+        for (var i =0; i< appartetement.length; i++){
+          appartetementFilter.push({
+            appartement: appartetement[i]
+          })
+        }
+        filerObj.$or = appartetementFilter;
+      }
+      else if(_session.isTenant()){
+        filerObj.appartement = _session.getAppartement();
+      }
+
+      collection.find(filerObj).sort({"createdDate": -1}).toArray(function (err, items) {
         if (err) {
           callBack(false, err);
         }
@@ -674,6 +871,7 @@ module.exports = {
 
   //Home
   getHomeDetails: function (callBack) {
+    var $self = this;
     mongoDbObj.db.collection('tickets', function (err, collection) {
 
       var newTickets = new Promise(function (resolve, reject) {
@@ -726,89 +924,409 @@ module.exports = {
           resolve(items)
         });
       });
+      var logs = new Promise(function (resolve, reject) {
+        $self.getLogs({},resolve);
+      });
 
-      Promise.all([newTickets, allOpenTickets, allClosedTickets, allTickets])
+      Promise.all([newTickets, allOpenTickets, allClosedTickets, allTickets, logs])
         .done(function (results) {
           var res = {
             new: results[0],
             open: results[1],
             closed: results[2],
-            all: results[3]
+            all: results[3],
+            logs: results[4],
           };
           callBack(true, res);
         });
     });
   },
   //Dashboard
-  getDashboardDetails: function (callBack) {
+  getDashboardDetails: function (callBack, _session) {
+    var $self = this;
     mongoDbObj.db.collection('tickets', function (err, collection) {
 
-      var newTickets = new Promise(function (resolve, reject) {
-        collection.find({
-          "status": 'Open',"isDeleted": false,
-          createdDate: {
-            $gte: new Date("2010-04-29T00:00:00.000Z"),
-            $lt: new Date("2019-05-01T00:00:00.000Z")
-          }
-        }).toArray(function (err, items) {
-          if (err) {
-            reject(err);
-          }
-          /// got recent tickets here
-          resolve(items);
-        });
-      });
-      var allOpenTickets = new Promise(function (resolve, reject) {
-        collection.find(
-          {
-            "status": 'Open', "isDeleted": false
-          }
-        ).toArray(function (err, items) {
-          if (err) {
-            reject(err);
-          }
-          /// got all open tickets here
-          resolve(items)
-        });
-      });
-      var allClosedTickets = new Promise(function (resolve, reject) {
-        collection.find(
-          {
-            "status": 'Close', "isDeleted": false
-          }
-        ).toArray(function (err, items) {
-          if (err) {
-            reject(err);
-          }
-          /// got all closed tickets here
-          resolve(items)
-        });
-      });
-      var allTickets = new Promise(function (resolve, reject) {
-        collection.find(
-          {
-            "isDeleted": false
-          }
-        ).toArray(function (err, items) {
-          if (err) {
-            reject(err);
-          }
-          /// got all tickets here
-          resolve(items)
-        });
-      });
 
-      Promise.all([newTickets, allOpenTickets, allClosedTickets, allTickets])
-        .done(function (results) {
-          var res = {
-            recent: results[0],
-            open: results[1],
-            closed: results[2],
-            all: results[3]
-          };
-          callBack(true, res);
+
+      if(_session.isAdmin()){
+        var newTickets = new Promise(function (resolve, reject) {
+          collection.find({
+            "status": 'Open',"isDeleted": false,
+            createdDate: {
+              $gte: new Date("2010-04-29T00:00:00.000Z"),
+              $lt: new Date("2019-05-01T00:00:00.000Z")
+            }
+          }).toArray(function (err, items) {
+            if (err) {
+              reject(err);
+            }
+            /// got recent tickets here
+            resolve(items);
+          });
         });
+        var allOpenTickets = new Promise(function (resolve, reject) {
+          collection.find(
+            {
+              "status": 'Open', "isDeleted": false
+            }
+          ).toArray(function (err, items) {
+            if (err) {
+              reject(err);
+            }
+            /// got all open tickets here
+            resolve(items)
+          });
+        });
+        var allClosedTickets = new Promise(function (resolve, reject) {
+          collection.find(
+            {
+              "status": 'Close', "isDeleted": false
+            }
+          ).toArray(function (err, items) {
+            if (err) {
+              reject(err);
+            }
+            /// got all closed tickets here
+            resolve(items)
+          });
+        });
+        var allTickets = new Promise(function (resolve, reject) {
+          collection.find(
+            {
+              "isDeleted": false
+            }
+          ).toArray(function (err, items) {
+            if (err) {
+              reject(err);
+            }
+            /// got all tickets here
+            resolve(items)
+          });
+        });
+        var logs = new Promise(function (resolve, reject) {
+          $self.getLogs({},function (data) {
+            resolve(data);
+          });
+        });
+        Promise.all([newTickets, allOpenTickets, allClosedTickets, allTickets,logs])
+          .done(function (results) {
+            var res = {
+              recent: results[0],
+              open: results[1],
+              closed: results[2],
+              all: results[3],
+              logs: results[4],
+            };
+            callBack(true, res);
+          });
+      }else if(_session.isManager()){
+        var primary = _session.getPrimaryAppartement();
+        var secondary = _session.getSecondaryAppartement();
+        var appartement = primary.concat(secondary);
+        var $or = [];
+        for (var i = 0; i < appartement.length; i++){
+          $or.push({appartement: appartement[i]});
+        }
+        var newTickets = new Promise(function (resolve, reject) {
+          collection.find({
+            "status": 'Open',"isDeleted": false,
+            createdDate: {
+              $gte: new Date("2010-04-29T00:00:00.000Z"),
+              $lt: new Date("2019-05-01T00:00:00.000Z")
+            },
+            $or: $or
+          }).toArray(function (err, items) {
+            if (err) {
+              reject(err);
+            }
+            /// got recent tickets here
+            resolve(items);
+          });
+        });
+        var allOpenTickets = new Promise(function (resolve, reject) {
+          collection.find(
+            {
+              "status": 'Open', "isDeleted": false, $or: $or
+            }
+          ).toArray(function (err, items) {
+            if (err) {
+              reject(err);
+            }
+            /// got all open tickets here
+            resolve(items)
+          });
+        });
+        var allClosedTickets = new Promise(function (resolve, reject) {
+          collection.find(
+            {
+              "status": 'Close', "isDeleted": false, $or: $or
+            }
+          ).toArray(function (err, items) {
+            if (err) {
+              reject(err);
+            }
+            /// got all closed tickets here
+            resolve(items)
+          });
+        });
+        var allTickets = new Promise(function (resolve, reject) {
+          collection.find(
+            {
+              "isDeleted": false, $or: $or
+            }
+          ).toArray(function (err, items) {
+            if (err) {
+              reject(err);
+            }
+            /// got all tickets here
+            resolve(items)
+          });
+        });
+
+        var logs = new Promise(function (resolve, reject) {
+          mongoDbObj.db.collection('users', function (err, collection) {
+            collection.find({ isDeleted: false, roles: { $in: ['tenant']}, $or: $or }).toArray(function (err, items) {
+              var filterObj = { $or: []};
+              if(items)
+              {
+                for (var i = 0; i < items.length; i++){
+                  filterObj.$or.push({ user: items[i]._id.toString() })
+                }
+              }
+              $self.getLogs(filterObj,function (data) {
+                resolve(data);
+              });
+            })
+          });
+
+        });
+        Promise.all([newTickets, allOpenTickets, allClosedTickets, allTickets,logs])
+          .done(function (results) {
+            var res = {
+              recent: results[0],
+              open: results[1],
+              closed: results[2],
+              all: results[3],
+              logs: results[4],
+            };
+            callBack(true, res);
+          });
+
+      }else if(_session.isTenant()){
+        //
+        var myOpenTickets = new Promise(function (resolve, reject) {
+          collection.find({
+            "status": 'Open',"isDeleted": false, owner: _session.getUserId()
+          }).toArray(function (err, items) {
+            if (err) {
+              reject(err);
+            }
+            /// got recent tickets here
+            resolve(items);
+          });
+        });
+        var myInProgressTickets = new Promise(function (resolve, reject) {
+          collection.find(
+            {
+              "status": 'InProgress',"isDeleted": false, owner: _session.getUserId()
+            }
+          ).toArray(function (err, items) {
+            if (err) {
+              reject(err);
+            }
+            /// got all open tickets here
+            resolve(items)
+          });
+        });
+        var myClosedTickets = new Promise(function (resolve, reject) {
+          collection.find(
+            {
+              "status": 'Close',"isDeleted": false, owner: _session.getUserId()
+            }
+          ).toArray(function (err, items) {
+            if (err) {
+              reject(err);
+            }
+            /// got all closed tickets here
+            resolve(items)
+          });
+        });
+        var myAllTickets = new Promise(function (resolve, reject) {
+          collection.find(
+            {
+              "isDeleted": false, owner: _session.getUserId()
+            }
+          ).toArray(function (err, items) {
+            if (err) {
+              reject(err);
+            }
+            /// got all tickets here
+            resolve(items)
+          });
+        });
+        //
+        var appartementRecentTickets = new Promise(function (resolve, reject) {
+          collection.find({
+            "status": 'Open',"isDeleted": false,
+            createdDate: {
+              $gte:  new Date(moment().add(-30, 'days').toISOString()),
+              $lt: new Date(moment().toISOString())
+            },
+            appartement: _session.getAppartement()
+
+          }).toArray(function (err, items) {
+            if (err) {
+              reject(err);
+            }
+            /// got recent tickets here
+            resolve(items);
+          });
+        });
+        var appartementOpenTickets = new Promise(function (resolve, reject) {
+          collection.find(
+            {
+              "status": 'Open', "isDeleted": false,
+              appartement: _session.getAppartement()
+            }
+          ).toArray(function (err, items) {
+            if (err) {
+              reject(err);
+            }
+            /// got all open tickets here
+            resolve(items)
+          });
+        });
+        var appartementClosedTickets = new Promise(function (resolve, reject) {
+          collection.find(
+            {
+              "status": 'Close', "isDeleted": false,
+              appartement: _session.getAppartement()
+            }
+          ).toArray(function (err, items) {
+            if (err) {
+              reject(err);
+            }
+            /// got all closed tickets here
+            resolve(items)
+          });
+        });
+        var appartmentAllTickets = new Promise(function (resolve, reject) {
+          collection.find(
+            {
+              "isDeleted": false,
+              appartement: _session.getAppartement()
+            }
+          ).toArray(function (err, items) {
+            if (err) {
+              reject(err);
+            }
+            /// got all tickets here
+            resolve(items)
+          });
+        });
+        //
+        var logs = new Promise(function (resolve, reject) {
+          var filterObj = { isDeleted: false, roles: ['manager'], $or: [{  primaryAppartements: { $in: [ _session.getAppartement() ] } },{ secondaryAppartements: { $in: [ _session.getAppartement() ] }}] };
+          mongoDbObj.db.collection('users', function (err, collection) {
+              collection.find(filterObj).toArray(function (err, items) {
+                if (err) {
+                  reject(err);
+                }
+                filterObj = {
+                  $or: []
+                };
+                if (items) {
+                  for (var i = 0; i < items.length; i++) {
+                    filterObj.$or.push({ user: items[i]._id.toString()})
+                  }
+                  $self.getLogs(filterObj, function (data) {
+                    resolve(data);
+                  });
+                }
+                else {
+                  resolve([]);
+                }
+
+              });
+          });
+
+
+
+        });
+
+
+
+        var queryArray = [
+          myOpenTickets,
+          myInProgressTickets,
+          myClosedTickets,
+          myAllTickets,
+          appartementRecentTickets,
+          appartementOpenTickets,
+          appartementClosedTickets,
+          appartmentAllTickets,
+          logs
+        ];
+
+        Promise.all(queryArray)
+          .done(function (results) {
+            var res = {
+              myOpenTickets: results[0],
+              myInProgressTickets: results[1],
+              myClosedTickets: results[2],
+              myAllTickets: results[3],
+
+              appartementRecentTickets: results[4],
+              appartementOpenTickets: results[5],
+              appartementClosedTickets: results[6],
+              appartmentAllTickets: results[7],
+
+              logs: results[8]
+            };
+            callBack(true, res);
+          });
+
+
+
+      }
     });
-  }
+  },
 
+  //logs
+  writeLogs: function (data, callBack) {
+    /*
+      data.msg
+      data.user,
+      data.appartement
+      data.createdDate
+     */
+    data.createdDate = new Date();
+    // data.role = _session.getRoles();
+    mongoDbObj.db.collection('logs', function (err, collection) {
+      collection.insert(data, function (err, items) {
+        // if (err) {
+        //   callBack(false, err);
+        // }
+        // callBack(true, data);
+      });
+    });
+  },
+  getLogs: function (filterObj, callBack) {
+    mongoDbObj.db.collection('logs', function (err, collection) {
+      filterObj.createdDate =  {
+        $gte:  new Date(moment().add(-30, 'days').toISOString()),
+          $lt: new Date(moment().toISOString())
+      };
+      collection.find(filterObj).sort({"createdDate": -1}).toArray(function (err, items) {
+        if (err) {
+          callBack(false, err);
+        }
+        for(var i = 0; i < items.length; i++){
+          items[i].msg = items[i].msg+ ' at '+ moment(items[i].createdDate, 'days').calendar();
+          items[i].createdDate = moment(items[i].createdDate, 'days').calendar();
+        }
+        callBack(items);
+      });
+    });
+  },
 };

@@ -2,7 +2,7 @@ import {AfterViewInit, Component, ElementRef, OnInit, ViewChild, ViewChildren} f
 import { LayoutComponentModule } from './layout-component.module';
 import {AppServiceService} from '../service/app-service.service';
 import {SessionModel} from '../model/Session';
-import {Router} from '@angular/router';
+import {ActivatedRoute, ActivatedRouteSnapshot, Router, RouterStateSnapshot} from '@angular/router';
 import {NotificationsService} from 'angular2-notifications';
 import {NavComponent} from './nav/nav.component';
 import {SidenavComponent} from './sidenav/sidenav.component';
@@ -17,7 +17,9 @@ export class LayoutComponent implements OnInit, AfterViewInit {
   @ViewChildren('lastvisted') lastvisted: ElementRef;
   @ViewChild(NavComponent) navComp: NavComponent;
   @ViewChild(DashboardComponent) dashboard: DashboardComponent;
+  loginStatus: boolean;
   constructor(private route: Router,
+              private activeRoute: ActivatedRoute,
               private appService: AppServiceService,
               private session: SessionModel,
               private notifyService: NotificationsService) {
@@ -26,41 +28,25 @@ export class LayoutComponent implements OnInit, AfterViewInit {
       password: this.session.getPassword(),
       shouldRememberUserNameAndPassword: this.session.shouldRememberUserNameAndPassword()
     };
-    this.appService.logIn(postData).subscribe((data) => {
-      if (data.hashKey) {
-        this.session.init(data);
-        this.appService.appInfo = data.appInfo;
-        // jj
-        if (this.session.isAdmin()) {
-          this.navComp.sideComp.menuItems = this.navComp.sideComp.adminMenu;
-          this.appService.getDashboardDetails().subscribe((res) => {
-            console.log(res);
-            if (this.dashboard) {
-              this.dashboard.recentTicketCount = res.recent.length;
-              this.dashboard.openTicketCount = res.open.length;
-              this.dashboard.totalTicketCount = res.total.length;
-              this.dashboard.closedTicketCount = res.closed.length;
-            }
-          });
-        } else if (this.session.isManager()) {
-          this.navComp.sideComp.menuItems = this.navComp.sideComp.managerMenu;
-        } else if (this.session.isTenant()) {
-          this.navComp.sideComp.menuItems = this.navComp.sideComp.tenantMenu;
-        }
-        console.log(this.session.getEmail());
-        console.log(`Admin: ${this.session.isAdmin()}`);
-        console.log(`Manager: ${this.session.isManager()}`);
-        console.log(`Tenant: ${this.session.isTenant()}`);
-        // k
-        this.navComp.lastvisted.nativeElement.textContent = this.session.getLastVisited();
-      } else {
-        this.route.navigate(['login']);
-        this.notifyService.error('Login Failed', 'Invalid Session');
-      }
-    });
   }
 
   ngOnInit() {
+    this.activeRoute.data
+      .subscribe((res) => {
+        const data = res.data;
+          if (data.hashKey) {
+            this.session.init(data);
+            this.appService.appInfo = data.appInfo;
+            // k
+            console.log(this.session.getEmail());
+            console.log(`Admin: ${this.session.isAdmin()}`);
+            console.log(`Manager: ${this.session.isManager()}`);
+            console.log(`Tenant: ${this.session.isTenant()}`);
+          } else {
+            this.route.navigate(['login']);
+            this.notifyService.error('Login Failed', 'Invalid Session');
+          }
+      });
   }
 
   ngAfterViewInit() {

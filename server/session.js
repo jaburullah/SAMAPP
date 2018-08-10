@@ -17,28 +17,49 @@ var sessionModel = function(data){
     };
     //_setSessionTimeout();
     return {
-        getUserId: function () {
-          return _data ? (_data._id ? _data._id.toString() : undefined) : undefined;
-        },
-        getUserName:function(){
-            return _data ? (_data.username ? _data.username : undefined) : undefined;
-        },
-        getEmail:function(){
-            return _data ? (_data.email ? _data.email : undefined): undefined;
-        },
-        isAdmin: function(){
-            return _data ? (_data.role ? _data.role === 'admin' : undefined) : undefined;
-        },
-        getRawData:function(){
-            return _data;
-        },
-        update:function(data){
-            console.log('session has been updated');
-            _data = data;
-        },
-        resetSession:function(){
-            //_setSessionTimeout();
-        }
+      getUserId: function () {
+        return _data ? (_data._id ? _data._id.toString() : undefined) : undefined;
+      },
+      getUserName: function () {
+        return _data ? (_data.username ? _data.username : undefined) : undefined;
+      },
+      getEmail: function () {
+        return _data ? (_data.email ? _data.email : undefined) : undefined;
+      },
+      getName: function () {
+        return _data ? (_data.name ? _data.name : undefined) : undefined;
+      },
+      isAdmin: function () {
+        return _data ? _data.roles.indexOf('admin')>= 0 : false;
+      },
+      isManager: function () {
+        return _data ? _data.roles.indexOf('manager')>=0: false;
+      },
+      isTenant: function () {
+        return _data ? _data.roles.indexOf('tenant')>=0: false;
+      },
+      getAppartement:function () {
+        return _data ? _data.appartement : [];
+      },
+      getPrimaryAppartement:function () {
+        return _data ? _data.primaryAppartements : [];
+      },
+      getSecondaryAppartement:function () {
+        return _data ? _data.secondaryAppartements: [];
+      },
+      getRoles: function () {
+        return _data ? (_data.roles ? _data.roles : []) : [];
+      },
+      getRawData: function () {
+        return _data;
+      },
+      update: function (data) {
+        console.log('session has been updated');
+        _data = data;
+      },
+      resetSession: function () {
+        //_setSessionTimeout();
+      }
     }
 };
 

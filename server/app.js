@@ -288,7 +288,8 @@ var config = {
   },
     secretKey: "SAMAPP_JABU",
     keySize: 16,
-    isProduction: true
+    isProduction: true,
+    sendGridKey:"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"
 };
 
 module.exports = config;

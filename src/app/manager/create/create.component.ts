@@ -97,7 +97,6 @@ export class CreateComponent implements OnInit, AfterViewInit {
     postData.roles = ['manager'];
     this.appService.saveManager(postData).subscribe((data) => {
       if (data.action) {
-        this.appService.manager.push(postData);
         this.appartementsPrimary = this.appartements;
         this.appartementsSecondary = this.appartements;
         if (this.selectedManagerIndex >= 0) {
@@ -105,6 +104,9 @@ export class CreateComponent implements OnInit, AfterViewInit {
           this.appService.selectedManagerIndex = -1;
           this.selectedManagerIndex = -1;
           this.button.nativeElement.textContent = 'Save';
+        } else {
+          postData._id = data._id;
+          this.appService.manager.push(postData);
         }
         this.managerform.resetForm();
         this.notifyService.success('Info', data.msg);
@@ -122,20 +124,20 @@ export class CreateComponent implements OnInit, AfterViewInit {
   }
 
   onClickDelete(appartementDelete) {
-    // this.confirmDialog = this.modalService.open(appartementDelete, {ariaLabelledBy: 'modal-basic-title'});
+    this.confirmDialog = this.modalService.open(appartementDelete, {ariaLabelledBy: 'modal-basic-title'});
   }
 
   onClickOk() {
-    // const postData = this.basicInfoForm.value;
-    // postData.roules = ['manager'];
-    // this.appService.deleteAppartement(postData).subscribe((data) => {
-    //   this.appService.appartement.splice(this.selectedManagerIndex, 1);
-    //   this.notifyService.success(`Manager ${postData.name} deleted successfully`);
-    //   this.confirmDialog.dismiss();
-    //   this.basicInfoForm.reset();
-    //   this.appService.selectedAppartementIndex = -1;
-    //   this.selectedManagerIndex = -1;
-    //   // this.button.nativeElement.textContent = 'Save';
-    // });
+    const postData = this.managerInfoForm.value;
+    postData.roules = ['manager'];
+    this.appService.deleteManager(postData).subscribe((data) => {
+      this.appService.manager.splice(this.selectedManagerIndex, 1);
+      this.notifyService.success(`Manager ${postData.name} deleted successfully`);
+      this.confirmDialog.dismiss();
+      this.managerform.reset();
+      this.appService.selectedManagerIndex = -1;
+      this.selectedManagerIndex = -1;
+      this.button.nativeElement.textContent = 'Save';
+    });
   }
 }

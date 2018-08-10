@@ -1,7 +1,7 @@
 
   <ul class="navbar-nav navbar-sidenav" id="exampleAccordion">
     <li  *ngFor="let menu of menuItems" class="nav-item" data-toggle="tooltip" data-placement="right" title="{{menu.getTitle()}}">
-      <a class="nav-link" href="{{menu.getLocation()}}">
+      <a class="nav-link" (click)="onNavigate(menu)" >
         <i class="fa fa-fw {{ menu.getIcon() }} mr-1"></i>
         <span class="nav-link-text">{{menu.getName()}}</span>
       </a>

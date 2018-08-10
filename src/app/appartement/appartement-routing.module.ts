@@ -4,6 +4,7 @@ import { RouterModule, Routes } from '@angular/router';
 import { DataTablesModule } from 'angular-datatables';
 import { ManageComponent} from './manage/manage.component';
 import { CreateComponent } from './create/create.component';
+import {InfoComponent} from './info/info.component';
 import { AppartementLayoutRoutes } from './appartement.routing';
 
 import { ReactiveFormsModule } from '@angular/forms';
@@ -24,6 +25,7 @@ import {
   MatTableModule,
   MatPaginatorModule
 } from '@angular/material';
+import {MomentModule} from 'angular2-moment';
 
 
 @NgModule({
@@ -48,7 +50,8 @@ import {
   ],
   declarations: [
     ManageComponent,
-    CreateComponent
+    CreateComponent,
+    InfoComponent
   ]
 })
 export class AppartementRoutingModule {}

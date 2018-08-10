@@ -43,7 +43,7 @@ export class NavComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit() {
-    this.lastvisted.nativeElement.textContent = 'hh'; // this.session.getLastVisited();
+    this.lastvisted.nativeElement.textContent = this.session.getLastVisited(); // this.session.getLastVisited();
   }
   onLogout() {
     this.logoutDialog.dismiss();

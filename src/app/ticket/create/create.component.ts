@@ -4,6 +4,7 @@ import {AppServiceService} from '../../service/app-service.service';
 import {NotificationsService} from 'angular2-notifications';
 import {Router} from '@angular/router';
 import {NgbModal, NgbModalRef} from '@ng-bootstrap/ng-bootstrap';
+import {SessionModel} from '../../model/Session';
 
 @Component({
   selector: 'app-create',
@@ -27,7 +28,9 @@ export class CreateComponent implements OnInit, AfterViewInit {
   @ViewChild('actionbutton', {read: ElementRef}) button: ElementRef;
   @ViewChild('ticketdelete', {read: ElementRef}) dialog: ElementRef;
   constructor(private modalService: NgbModal,
-              private router: Router, private appService: AppServiceService,
+              private session: SessionModel,
+              private router: Router,
+              private appService: AppServiceService,
               private notifyService: NotificationsService,
               private fb: FormBuilder) { }
   ngOnInit() {
@@ -97,9 +100,9 @@ export class CreateComponent implements OnInit, AfterViewInit {
       this.notifyService.warn(`Error`, 'Enter ticket info');
       return;
     }
-    const postData = this.ticketInfoForm.value;
+    let postData = this.ticketInfoForm.value;
     postData.isDeleted = false;
-    // postData.no = false;
+    // postData.owner = this.session.getUserId();
     this.appService.saveTicket(postData).subscribe((data) => {
       if (data.action) {
         if (this.selectedTicketIndex >= 0) {
@@ -108,6 +111,7 @@ export class CreateComponent implements OnInit, AfterViewInit {
           this.selectedTicketIndex = -1;
           this.button.nativeElement.textContent = 'Save';
         } else {
+          postData = data.data;
           this.appService.ticket.push(postData);
         }
         this.ticketform.resetForm();
