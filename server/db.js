@@ -275,8 +275,8 @@ module.exports = {
 
     mongoDbObj.db.collection('appartements', function (err, collection) {
       if (_session.isManager()) {
-        var primaryAppartement = _getMId(_session.getPrimaryAppartement());
-        var secondaryAppartement = _getMId(_session.getSecondaryAppartement());
+        var primaryAppartement = _getMId(_session.getPrimaryAppartement() || []);
+        var secondaryAppartement = _getMId(_session.getSecondaryAppartement() || []);
 
         var primary = new Promise(function (resolve, reject) {
           collection.find({
@@ -1321,10 +1321,14 @@ module.exports = {
         if (err) {
           callBack(false, err);
         }
-        for(var i = 0; i < items.length; i++){
-          items[i].msg = items[i].msg+ ' at '+ moment(items[i].createdDate, 'days').calendar();
-          items[i].createdDate = moment(items[i].createdDate, 'days').calendar();
+
+        if(items){
+          for(var i = 0; i < items.length; i++){
+            items[i].msg = items[i].msg+ ' at '+ moment(items[i].createdDate, 'days').calendar();
+            items[i].createdDate = moment(items[i].createdDate, 'days').calendar();
+          }
         }
+
         callBack(items);
       });
     });
