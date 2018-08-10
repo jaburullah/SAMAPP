@@ -15,7 +15,9 @@ export class ManageComponent implements OnInit {
   // appartementGrid: Response[] = [];
   tenantGrid = new MatTableDataSource<ManagerModel>(null);
   @ViewChild(MatPaginator) paginator: MatPaginator;
-  constructor(private router: Router, private appService: AppServiceService) { }
+  constructor(private router: Router, private appService: AppServiceService) {
+    this.appService.selectedTenantIndex = -1;
+  }
 
   ngOnInit() {
     this.appService.getTenant().subscribe((data) => {

@@ -593,7 +593,7 @@ module.exports = {
                   user: _session.getUserId()
                 };
                 $self.writeLogs(logData);
-                callBack(true, {action: true, msg: 'Tenant/House Owner ' + data.name + ' updated successfully'});
+                callBack(true, {action: true, msg: 'Customer ' + data.name + ' updated successfully'});
 
               });
           }
@@ -610,7 +610,7 @@ module.exports = {
               sendGrill().sendNewUserMail(data);
               $self.writeLogs(logData);
               console.log(items.ops[0]._id.toString());
-              callBack(true, {action: true, msg: 'Tenant/House Owner ' + data.name + ' created successfully' , _id: items.ops[0]._id.toString()});
+              callBack(true, {action: true, msg: 'Customer' + data.name + ' created successfully' , _id: items.ops[0]._id.toString()});
             });
           }
         };

@@ -23,6 +23,7 @@ export class ManageComponent implements OnInit {
               public session: SessionModel,
               private appService: AppServiceService) {
     this.session = session;
+    this.appService.selectedTicketIndex = -1;
   }
 
   ngOnInit() {

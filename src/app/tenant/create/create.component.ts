@@ -114,7 +114,7 @@ export class CreateComponent implements OnInit, AfterViewInit {
       this.notifyService.success(`Customer ${postData.name} deleted successfully`);
       this.confirmDialog.dismiss();
       this.tenantform.reset();
-      this.appService.selectedAppartementIndex = -1;
+      this.appService.selectedTenantIndex = -1;
       this.selectedTenantIndex = -1;
       this.button.nativeElement.textContent = 'Save';
     });

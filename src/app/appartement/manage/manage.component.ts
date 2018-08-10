@@ -20,6 +20,7 @@ export class ManageComponent implements OnInit {
   sessionM;
   constructor(private router: Router, private appService: AppServiceService, private session: SessionModel) {
     this.sessionM = this.session;
+    this.appService.selectedAppartementIndex = -1;
   }
 
   ngOnInit() {

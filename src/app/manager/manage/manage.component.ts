@@ -19,6 +19,7 @@ export class ManageComponent implements OnInit {
   hasSession = false;
   constructor(private router: Router, private appService: AppServiceService, private session: SessionModel) {
     this.hasSession = this.session.hasSession;
+    this.appService.selectedManagerIndex = -1;
   }
 
   ngOnInit() {
