@@ -59,6 +59,9 @@ var sessionModel = function(data){
       },
       resetSession: function () {
         //_setSessionTimeout();
+      },
+      isBuild: function () {
+        return this._data.isBuild;
       }
     }
 };

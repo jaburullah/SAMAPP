@@ -232,7 +232,7 @@ app.post('/login',function(req,res) {
 
   var _response = function (sessionValue, status,data) {
     // data.hashKey = sessionValue;
-
+    data.isProduction = theApp.isProduction;
     res.json(utils.jsonResponse(_session[sessionValue],status,data));
   };
 

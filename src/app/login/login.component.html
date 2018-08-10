@@ -4,7 +4,7 @@
       <mat-card>
         <mat-card-content>
           <mat-card-title>Login</mat-card-title>
-          <form [formGroup]="loginForm" novalidate (ngSubmit)="onSubmitLogin()">
+          <form [formGroup]="loginForm" #loginF="ngForm" novalidate (ngSubmit)="onSubmitLogin()">
           <div class="row">
             <div class="col-lg-12 mb-2">
               <mat-form-field class="example-full-width">

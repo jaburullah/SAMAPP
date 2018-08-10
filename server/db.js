@@ -746,14 +746,14 @@ module.exports = {
     }
     else {
       userId = data.manager;
-      if (data.isNewTicket) {
+      // if (data.isNewTicket) {
         title = "Ticket Created";
         body = "Type: " + data.type + ", Status: " + data.status + ", Priority: " + data.priority;
-      }
-      else {
+      // }
+      // else {
         title = "Ticket Modified";
         body = "Type: " + data.type + ", Status: " + data.status + ", Priority: " + data.priority;
-      }
+      // }
 
     }
 
@@ -789,7 +789,7 @@ module.exports = {
               callBack(false, err);
             }
             data.id = id;
-            data.isNewTicket = false;
+            //data.isNewTicket = false;
             $this.sendNotification(data);
             var logData = {
               msg: 'Ticket No:'+data.no +" is updated, by "+ _session.getName(),
@@ -808,7 +808,7 @@ module.exports = {
             callBack(false, err);
           }
           data._id = items.ops[0]._id;
-          data.isNewTicket = true;
+          //data.isNewTicket = true;
           $this.sendNotification(data);
           var logData = {
             msg: 'Ticket No:'+data.no +" is created, by "+ _session.getName(),
@@ -1327,6 +1327,9 @@ module.exports = {
             items[i].msg = items[i].msg+ ' at '+ moment(items[i].createdDate, 'days').calendar();
             items[i].createdDate = moment(items[i].createdDate, 'days').calendar();
           }
+        }
+        else {
+          items = [];
         }
 
         callBack(items);

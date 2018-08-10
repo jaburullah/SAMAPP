@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, OnInit, ViewChild} from '@angular/core';
 import {AppServiceService, Response} from '../service/app-service.service';
 import { Observable } from 'rxjs';
 import {Router} from '@angular/router';
@@ -17,6 +17,7 @@ export class LoginComponent implements OnInit {
   // session: SessionModel;
   loginForm: FormGroup;
   errors;
+  @ViewChild('loginF') loginF;
   constructor(private appService: AppServiceService,
               private route: Router, private session: SessionModel,
               private notifyService: NotificationsService) { }
@@ -56,7 +57,7 @@ export class LoginComponent implements OnInit {
     this.appService.logIn(postData).subscribe((data) => {
       if (data.hashKey) {
         this.session.init(data);
-        this.loginForm.reset();
+        this.loginF.resetForm();
         this.route.navigate(['dashboard']);
       } else {
         this.notifyService.error('Login Failed', 'Invalid Email and Password');

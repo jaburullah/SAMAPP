@@ -22,8 +22,8 @@ export class Response {
 // })
 @Injectable()
 export class AppServiceService {
-  // rootURL = 'http://localhost:8084/';
-  rootURL = 'https://samappartement.herokuapp.com/';
+  rootURL = '';
+  // rootURL = 'https://samappartement.herokuapp.com/';
   appInfo;
   appartement: Appartement[] = [];
   manager: any[] = [];
@@ -34,7 +34,13 @@ export class AppServiceService {
   selectedTenantIndex: number;
   selectedTicketIndex: number;
   constructor(private http: HttpClient, private session: SessionModel, private router: Router) {
-    }
+    // if (true) {
+      this.rootURL = document.location.origin + '/';
+    // } else {
+    //   this.rootURL = 'http://localhost:8084/';
+    // }
+    console.log(document.location.origin);
+  }
   isAuthenticated(data): Observable<any> {
     // if (!data.email) {
     //   data.email = this.session.getEmail();
