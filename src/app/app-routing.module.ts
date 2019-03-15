@@ -1,6 +1,7 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Routes } from '@angular/router';
+
 import {LoginComponent} from './login/login.component';
 import {DashboardComponent} from './dashboard/dashboard.component';
 import {AppartementComponent} from './appartement/appartement.component';
@@ -10,15 +11,26 @@ import {ManagerComponent} from './manager/manager.component';
 import {TenantComponent} from './tenant/tenant.component';
 import {TicketComponent} from './ticket/ticket.component';
 import {AuthenticationResolve} from './service/Authentication';
+import { FarmOwnerComponent } from './farm-owner/farm-owner.component';
+import { FarmComponent } from './farm/farm.component';
+import { SeedComponent } from './seed/seed.component';
+import { PodOwnerComponent } from './pod-owner/pod-owner.component';
+import { PodComponent } from './pod/pod.component';
+
+// farms
+import { FarmDashboardComponent } from './farm-dashboard/farm-dashboard.component';
+import { FarmLoginComponent } from './farm-login/farm-login.component';
 
 const routes: Routes = [
   { path: '', redirectTo: '/login', pathMatch: 'full' },
-  { path: 'login', component: LoginComponent },
-  { path: '', component: LayoutComponent,
+  { path: 'login', component: FarmLoginComponent },
+  {
+    path: '', component: LayoutComponent,
     children: [
-      {path: '', redirectTo: 'dashboard', pathMatch: 'full'},
-      {path: 'dashboard', component: DashboardComponent},
-      {path: 'appartement', component: AppartementComponent,
+      { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+      { path: 'dashboard', component: FarmDashboardComponent },
+      {
+        path: 'appartement', component: AppartementComponent,
         children: [
           {
             path: '',
@@ -26,7 +38,8 @@ const routes: Routes = [
           }
         ]
       },
-      {path: 'manager', component: ManagerComponent,
+      {
+        path: 'manager', component: ManagerComponent,
         children: [
           {
             path: '',
@@ -34,7 +47,8 @@ const routes: Routes = [
           }
         ]
       },
-      {path: 'tenant', component: TenantComponent,
+      {
+        path: 'tenant', component: TenantComponent,
         children: [
           {
             path: '',
@@ -42,11 +56,60 @@ const routes: Routes = [
           }
         ]
       },
-      {path: 'ticket', component: TicketComponent,
+      {
+        path: 'ticket', component: TicketComponent,
         children: [
           {
             path: '',
             loadChildren: './ticket/ticket.module#TicketRoutingModule'
+          }
+        ]
+      },
+      {
+        path: 'farmOwner', component: FarmOwnerComponent, children: [
+          {
+            path: '',
+            loadChildren: './farm-owner/farm-owner-routing.module#FarmOwnerRoutingModule'
+          }
+        ]
+      },
+      {
+        path: 'farms', component: FarmComponent, children: [
+          {
+            path: '',
+            loadChildren: './farm/farm-routing.module#FarmsRoutingModule'
+          }
+        ]
+      },
+      {
+        path: 'seeds', component: SeedComponent, children: [
+          {
+            path: '',
+            loadChildren: './seed/seed-routing.module#SeedsRoutingModule'
+          }
+        ]
+      },
+      {
+        path: 'podOwner', component: PodOwnerComponent, children: [
+          {
+            path: '',
+            loadChildren: './pod-owner/pod-owner-routing.module#PodOwnerRoutingModule'
+          }
+        ]
+      },
+      {
+        path: 'pods', component: PodComponent, children: [
+          {
+            path: '',
+            loadChildren: './pod/pod-routing.module#PodRoutingModule'
+          }
+        ]
+      },
+      {
+        path: 'beds', component: PodComponent, children: [
+          {
+            path: '',
+            loadChildren: './bed/bed-routing.module#BedRoutingModule'
           }
         ]
       },
@@ -55,7 +118,7 @@ const routes: Routes = [
       data: AuthenticationResolve,
     }
   },
-  { path: '**', redirectTo: '/login'}
+  { path: '**', redirectTo: '/login' }
 ];
 
 

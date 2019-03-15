@@ -1,6 +1,7 @@
 /**
  * Created by jaburur on 16-07-2017.
  */
+
 var express = require('express');
 var bodyParser = require('body-parser');
 var moment = require('moment');
@@ -326,6 +327,174 @@ app.get('/appartementDetails',function(req,res){
     }
 });
 
+//Farm Owner
+app.post('/saveFarmOwner',function(req,res) {
+  var sessionValue = _sessionCheck(req, res);
+  if(sessionValue){
+    db.saveFarmOwner(req.body, function (status, data) {
+      res.json(utils.jsonResponse(_session[sessionValue], status, data));
+    }, _session[sessionValue]);
+  }
+});
+
+app.get('/farmOwnerDetails',function(req,res){
+  var sessionValue = _sessionCheck(req, res);
+    if(sessionValue){
+      db.getFarmOwnerDetails(function(status,data){
+        res.json(utils.jsonResponse(_session[sessionValue],status,data));
+      }, _session[sessionValue]);
+    }
+});
+
+app.post('/deleteFarmOwner',function(req,res) {
+  var sessionValue = _sessionCheck(req, res);
+  if(sessionValue){
+    db.deleteFarmOwner(req.body, function (status, data) {
+      res.json(utils.jsonResponse(_session[sessionValue], status, {}));
+    }, _session[sessionValue]);
+  }
+});
+
+//Farms
+app.post('/saveFarm',function(req,res) {
+  var sessionValue = _sessionCheck(req, res);
+  if(sessionValue){
+    db.saveFarm(req.body, function (status, data) {
+      res.json(utils.jsonResponse(_session[sessionValue], status, data));
+    }, _session[sessionValue]);
+  }
+});
+
+app.get('/farmDetails',function(req,res){
+  var sessionValue = _sessionCheck(req, res);
+    if(sessionValue){
+      db.getFarmDetails(function(status,data){
+        res.json(utils.jsonResponse(_session[sessionValue],status,data));
+      }, _session[sessionValue]);
+    }
+});
+
+app.post('/deleteFarm',function(req,res) {
+  var sessionValue = _sessionCheck(req, res);
+  if(sessionValue){
+    db.deleteFarm(req.body, function (status, data) {
+      res.json(utils.jsonResponse(_session[sessionValue], status, {}));
+    }, _session[sessionValue]);
+  }
+});
+
+//Seeds
+app.post('/saveSeed',function(req,res) {
+  var sessionValue = _sessionCheck(req, res);
+  if(sessionValue){
+    db.saveSeed(req.body, function (status, data) {
+      res.json(utils.jsonResponse(_session[sessionValue], status, data));
+    }, _session[sessionValue]);
+  }
+});
+
+app.get('/seedDetails',function(req,res){
+  var sessionValue = _sessionCheck(req, res);
+    if(sessionValue){
+      db.getSeedDetails(function(status,data){
+        res.json(utils.jsonResponse(_session[sessionValue],status,data));
+      }, _session[sessionValue]);
+    }
+});
+
+app.post('/deleteSeed',function(req,res) {
+  var sessionValue = _sessionCheck(req, res);
+  if(sessionValue){
+    db.deleteSeed(req.body, function (status, data) {
+      res.json(utils.jsonResponse(_session[sessionValue], status, {}));
+    }, _session[sessionValue]);
+  }
+});
+
+//Pod Owner
+app.post('/savePodOwner',function(req,res) {
+  var sessionValue = _sessionCheck(req, res);
+  if(sessionValue){
+    db.savePodOwner(req.body, function (status, data) {
+      res.json(utils.jsonResponse(_session[sessionValue], status, data));
+    }, _session[sessionValue]);
+  }
+});
+
+app.get('/podOwnerDetails',function(req,res){
+  var sessionValue = _sessionCheck(req, res);
+    if(sessionValue){
+      db.getPodOwnerDetails(function(status,data){
+        res.json(utils.jsonResponse(_session[sessionValue],status,data));
+      }, _session[sessionValue]);
+    }
+});
+
+app.post('/deletePodOwner',function(req,res) {
+  var sessionValue = _sessionCheck(req, res);
+  if(sessionValue){
+    db.deletePodOwner(req.body, function (status, data) {
+      res.json(utils.jsonResponse(_session[sessionValue], status, {}));
+    }, _session[sessionValue]);
+  }
+});
+
+//Pod
+app.post('/savePod',function(req,res) {
+  var sessionValue = _sessionCheck(req, res);
+  if(sessionValue){
+    db.savePod(req.body, function (status, data) {
+      res.json(utils.jsonResponse(_session[sessionValue], status, data));
+    }, _session[sessionValue]);
+  }
+});
+
+app.get('/podDetails',function(req,res){
+  var sessionValue = _sessionCheck(req, res);
+    if(sessionValue){
+      db.getPodDetails(function(status,data){
+        res.json(utils.jsonResponse(_session[sessionValue],status,data));
+      }, _session[sessionValue]);
+    }
+});
+
+app.post('/deletePod',function(req,res) {
+  var sessionValue = _sessionCheck(req, res);
+  if(sessionValue){
+    db.deletePod(req.body, function (status, data) {
+      res.json(utils.jsonResponse(_session[sessionValue], status, {}));
+    }, _session[sessionValue]);
+  }
+});
+
+//bed
+app.post('/saveBed',function(req,res) {
+  var sessionValue = _sessionCheck(req, res);
+  if(sessionValue){
+    db.saveBed(req.body, function (status, data) {
+      res.json(utils.jsonResponse(_session[sessionValue], status, data));
+    }, _session[sessionValue]);
+  }
+});
+
+app.get('/bedDetails',function(req,res){
+  var sessionValue = _sessionCheck(req, res);
+    if(sessionValue){
+      db.getBedDetails(function(status,data){
+        res.json(utils.jsonResponse(_session[sessionValue],status,data));
+      }, _session[sessionValue]);
+    }
+});
+
+app.post('/deleteBed',function(req,res) {
+  var sessionValue = _sessionCheck(req, res);
+  if(sessionValue){
+    db.deleteBed(req.body, function (status, data) {
+      res.json(utils.jsonResponse(_session[sessionValue], status, {}));
+    }, _session[sessionValue]);
+  }
+});
+
 //Manager
 app.post('/saveManager',function(req,res){
   var sessionValue = _sessionCheck(req, res);
@@ -507,25 +676,29 @@ var http = require('http').Server(app);
 var io = require('socket.io')(http);
 
 
-io.on('connection', function(socket){
-    console.log('a user connected'+socket.id);
-    socket.on('TicketCreated',function(){
-            console.log('Ticket Created By: '+socket.id);
-            var allSocket = io.sockets.sockets;
-            allSocket.forEach(function(soc){
+io.on('connection', function(socket) {
+  console.log('a user connected' + socket.id);
+  socket.on('TicketCreated', function () {
+    console.log('Ticket Created By: ' + socket.id);
+    var allSocket = io.sockets.sockets;
+    allSocket.forEach(function (soc) {
 
-                if(soc.id!= socket.id){
-                    soc.emit('Ticket',{data:"test"})
-                }
+      if (soc.id != socket.id) {
+        soc.emit('Ticket', {data: "test"})
+      }
 
-            });
-
-
-        });
-
-    socket.on('disconnect',function(){
-        console.log('a user disconnected'+socket.id);
     });
+
+
+  });
+
+  socket.on('disconnect', function () {
+    console.log('a user disconnected' + socket.id);
+  });
+  socket.on('message', function (message) {
+    console.log("Message Received: " + message);
+    io.emit('message', {type: 'new-message', text: message});
+  });
 });
 
 http.listen(theApp.port, function(){

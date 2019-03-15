@@ -20,10 +20,16 @@ export class SidenavComponent implements OnInit {
     if (this.session.isAdmin()) {
       this.menuItems = [
         new MenuItem({ icon: 'fa-dashboard', name: 'Dashboard', location: 'dashboard', title: 'Dashboard' }),
-        new MenuItem({ icon: 'fa-building', name: 'Appartement', location: 'appartement', title: 'Appartement' }),
-        new MenuItem({ icon: 'fa-user-secret', name: 'Manager', location: 'manager', title: 'Manager' }),
-        new MenuItem({ icon: 'fa-user', name: 'Customer', location: 'tenant', title: 'Customer' }),
-        new MenuItem({ icon: 'fa-ticket', name: 'Ticket', location: 'ticket', title: 'Ticket' }),
+        // new MenuItem({ icon: 'fa-building', name: 'Appartement', location: 'appartement', title: 'Appartement' }),
+        // new MenuItem({ icon: 'fa-user-secret', name: 'Manager', location: 'manager', title: 'Manager' }),
+        // new MenuItem({ icon: 'fa-user', name: 'Customer', location: 'tenant', title: 'Customer' }),
+        // new MenuItem({ icon: 'fa-ticket', name: 'Ticket', location: 'ticket', title: 'Ticket' }),
+        new MenuItem({ icon: 'fa-user-secret', name: 'Farm Owner', location: 'farmOwner', title: 'Farm Owner' }),
+        new MenuItem({ icon: 'fa-tree', name: 'Farms', location: 'farms', title: 'Farms' }),
+        new MenuItem({ icon: 'fa-snowflake-o', name: 'Seeds', location: 'seeds', title: 'Seeds' }),
+        new MenuItem({ icon: 'fa-user', name: 'Pod Owner', location: 'podOwner', title: 'Pod Owner' }),
+        new MenuItem({ icon: 'fa-eercast', name: 'Pods', location: 'pods', title: 'Pods' }),
+        new MenuItem({ icon: 'fa-podcast', name: 'Beds', location: 'beds', title: 'Beds' }),
       ];
       // this.appService.getDashboardDetails().subscribe((res) => {
       //   console.log(res);

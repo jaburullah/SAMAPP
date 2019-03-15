@@ -7,6 +7,7 @@ import {SessionModel} from '../model/Session';
 import {FormControl, FormGroup, Validators} from '@angular/forms';
 import {environment} from '../../environments/environment.prod';
 import {NotificationsService} from 'angular2-notifications';
+// import * as io from 'socket.io-client';
 
 @Component({
   selector: 'app-login',
@@ -17,10 +18,30 @@ export class LoginComponent implements OnInit {
   // session: SessionModel;
   loginForm: FormGroup;
   errors;
+  private url = 'http://localhost:3000';
+  // private socket;
+  message: string;
+  messages: string[] = [];
   @ViewChild('loginF') loginF;
   constructor(private appService: AppServiceService,
               private route: Router, private session: SessionModel,
-              private notifyService: NotificationsService) { }
+              private notifyService: NotificationsService) {
+    //this.socket = io(this.url);
+    // this.getMessages()
+    //   .subscribe((message: string) => {
+    //     this.messages.push(message);
+    //   });
+  }
+  // sendMessage(message) {
+  //   this.socket.emit('new-message', message);
+  // }
+  // getMessages() {
+  //   return Observable.create((observer) => {
+  //     this.socket.on('new-message', (message) => {
+  //       observer.next(message);
+  //     });
+  //   });
+  // }
   ngOnInit() {
     this.createLoginForm();
     this.errors = {

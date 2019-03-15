@@ -24,6 +24,17 @@ import { MaterialModule } from './material.module';
 import { TenantComponent } from './tenant/tenant.component';
 import { TicketComponent } from './ticket/ticket.component';
 import { MomentModule } from 'angular2-moment';
+// import {ChatService} from './chat.service';
+// import {WebsocketService} from './websocket.service';
+import { CoreModule } from './core/core.module';
+import { FarmDashboardComponent } from './farm-dashboard/farm-dashboard.component';
+import { FarmLoginComponent } from './farm-login/farm-login.component';
+import { FarmOwnerComponent } from './farm-owner/farm-owner.component';
+import { FarmComponent } from './farm/farm.component';
+import { SeedComponent } from './seed/seed.component';
+import { PodComponent } from './pod/pod.component';
+import { PodOwnerComponent } from './pod-owner/pod-owner.component';
+import { BedComponent } from './bed/bed.component';
 
 @NgModule({
   declarations: [
@@ -34,7 +45,15 @@ import { MomentModule } from 'angular2-moment';
     AppartementComponent,
     ManagerComponent,
     TenantComponent,
-    TicketComponent
+    TicketComponent,
+    FarmDashboardComponent,
+    FarmLoginComponent,
+    FarmOwnerComponent,
+    FarmComponent,
+    SeedComponent,
+    PodComponent,
+    PodOwnerComponent,
+    BedComponent
   ],
   imports: [
     BrowserModule,
@@ -50,6 +69,9 @@ import { MomentModule } from 'angular2-moment';
     MaterialModule
   ],
   providers: [
+    // { provide: ChatService, useClass: ChatService },
+    // { provide: WebsocketService, useClass: WebsocketService },
+    // cc
     { provide: ErrorHandler, useClass: AppErrorHandler },
     { provide: AuthenticationResolve, useClass: AuthenticationResolve },
     { provide: SessionModel, useClass: SessionModel },

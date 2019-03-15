@@ -25,7 +25,7 @@ module.exports = {
     fcm.init();
     var connection = theApp.mongoDBConnection;
     if (theApp.isProduction) {
-      connection = theApp.mongoDBConnectionProduction;
+      connection = theApp.mongoDBConnectionProduction || theApp.mongoDBConnection;
     }
     mongoClient.connect(connection, function (err, db) {
       if (err)
@@ -404,9 +404,437 @@ module.exports = {
       }
     });
   },
+
   deleteAppartement: function (data, callBack,_session) {
     var $self = this;
     mongoDbObj.db.collection('appartements', function (err, collection) {
+      collection.update(
+        {'_id': new mongoDB.ObjectID(data._id)}, {$set: {"isDeleted": true}}, function (err, items) {
+          if (err) {
+            callBack(false, err);
+          }
+          var logData = {
+            msg: '<strong>'+ data.name +"</strong> is deleted, by "+ _session.getName(),
+            user: _session.getUserId()
+          };
+          $self.writeLogs(logData);
+          callBack(true, items);
+        });
+    });
+  },
+
+// farm owner
+  saveFarmOwner: function (data, callBack,_session) {
+    var $self = this;
+    mongoDbObj.db.collection('farmOwner', function (err, collection) {
+      if (data._id) {
+        var id = data._id;
+        delete data._id;
+        collection.update(
+          {'_id': new mongoDB.ObjectID(id)},
+          {$set: data},
+          function (err, items) {
+            if (err) {
+              callBack(false, err);
+            }
+            var logData = {
+              msg: '<strong>'+ data.name +"</strong> is updated, by "+ _session.getName(),
+              user: _session.getUserId()
+            };
+            $self.writeLogs(logData);
+            callBack(true, items);
+
+          });
+      }
+      else {
+        delete data.id;
+        collection.insert(data, function (err, items) {
+          if (err) {
+            callBack(false, err);
+          }
+          var logData = {
+            msg: '<strong>'+ data.name +"</strong> is created, by "+ _session.getName(),
+            user: _session.getUserId()
+          };
+          $self.writeLogs(logData);
+          callBack(true, { _id: items.ops[0]._id.toString()});
+        });
+      }
+    });
+  },
+
+  getFarmOwnerDetails: function (callBack, _session) {
+
+
+    mongoDbObj.db.collection('farmOwner', function (err, collection) {
+      collection.find({ "isDeleted": false }).toArray(function (err, items) {
+        if (err) {
+          callBack(false, err);
+        }
+        callBack(true, items);
+      });
+    });
+  },
+
+  deleteFarmOwner: function (data, callBack,_session) {
+    var $self = this;
+    mongoDbObj.db.collection('farmOwner', function (err, collection) {
+      collection.update(
+        {'_id': new mongoDB.ObjectID(data._id)}, {$set: {"isDeleted": true}}, function (err, items) {
+          if (err) {
+            callBack(false, err);
+          }
+          var logData = {
+            msg: '<strong>'+ data.name +"</strong> is deleted, by "+ _session.getName(),
+            user: _session.getUserId()
+          };
+          $self.writeLogs(logData);
+          callBack(true, items);
+        });
+    });
+  },
+
+// farm
+  saveFarm: function (data, callBack,_session) {
+    var $self = this;
+    mongoDbObj.db.collection('farms', function (err, collection) {
+      if (data._id) {
+        var id = data._id;
+        delete data._id;
+        collection.update(
+          {'_id': new mongoDB.ObjectID(id)},
+          {$set: data},
+          function (err, items) {
+            if (err) {
+              callBack(false, err);
+            }
+            var logData = {
+              msg: '<strong>'+ data.name +"</strong> is updated, by "+ _session.getName(),
+              user: _session.getUserId()
+            };
+            $self.writeLogs(logData);
+            callBack(true, items);
+
+          });
+      }
+      else {
+        delete data.id;
+        collection.insert(data, function (err, items) {
+          if (err) {
+            callBack(false, err);
+          }
+          var logData = {
+            msg: '<strong>'+ data.name +"</strong> is created, by "+ _session.getName(),
+            user: _session.getUserId()
+          };
+          $self.writeLogs(logData);
+          callBack(true, { _id: items.ops[0]._id.toString()});
+        });
+      }
+    });
+  },
+
+  getFarmDetails: function (callBack, _session) {
+
+
+    mongoDbObj.db.collection('farms', function (err, collection) {
+      collection.find({ "isDeleted": false }).toArray(function (err, items) {
+        if (err) {
+          callBack(false, err);
+        }
+        callBack(true, items);
+      });
+    });
+  },
+
+  deleteFarm: function (data, callBack,_session) {
+    var $self = this;
+    mongoDbObj.db.collection('farms', function (err, collection) {
+      collection.update(
+        {'_id': new mongoDB.ObjectID(data._id)}, {$set: {"isDeleted": true}}, function (err, items) {
+          if (err) {
+            callBack(false, err);
+          }
+          var logData = {
+            msg: '<strong>'+ data.name +"</strong> is deleted, by "+ _session.getName(),
+            user: _session.getUserId()
+          };
+          $self.writeLogs(logData);
+          callBack(true, items);
+        });
+    });
+  },
+
+// seed
+  saveSeed: function (data, callBack,_session) {
+    var $self = this;
+    mongoDbObj.db.collection('seeds', function (err, collection) {
+      if (data._id) {
+        var id = data._id;
+        delete data._id;
+        collection.update(
+          {'_id': new mongoDB.ObjectID(id)},
+          {$set: data},
+          function (err, items) {
+            if (err) {
+              callBack(false, err);
+            }
+            var logData = {
+              msg: '<strong>'+ data.name +"</strong> is updated, by "+ _session.getName(),
+              user: _session.getUserId()
+            };
+            $self.writeLogs(logData);
+            callBack(true, items);
+
+          });
+      }
+      else {
+        delete data.id;
+        collection.insert(data, function (err, items) {
+          if (err) {
+            callBack(false, err);
+          }
+          var logData = {
+            msg: '<strong>'+ data.name +"</strong> is created, by "+ _session.getName(),
+            user: _session.getUserId()
+          };
+          $self.writeLogs(logData);
+          callBack(true, { _id: items.ops[0]._id.toString()});
+        });
+      }
+    });
+  },
+
+  getSeedDetails: function (callBack, _session) {
+
+
+    mongoDbObj.db.collection('seeds', function (err, collection) {
+      collection.find({ "isDeleted": false }).toArray(function (err, items) {
+        if (err) {
+          callBack(false, err);
+        }
+        callBack(true, items);
+      });
+    });
+  },
+
+  deleteSeed: function (data, callBack,_session) {
+    var $self = this;
+    mongoDbObj.db.collection('seeds', function (err, collection) {
+      collection.update(
+        {'_id': new mongoDB.ObjectID(data._id)}, {$set: {"isDeleted": true}}, function (err, items) {
+          if (err) {
+            callBack(false, err);
+          }
+          var logData = {
+            msg: '<strong>'+ data.name +"</strong> is deleted, by "+ _session.getName(),
+            user: _session.getUserId()
+          };
+          $self.writeLogs(logData);
+          callBack(true, items);
+        });
+    });
+  },
+
+  // pod owner
+
+  savePodOwner: function (data, callBack, _session) {
+    var $self = this;
+    mongoDbObj.db.collection('podOwner', function (err, collection) {
+      if (data._id) {
+        var id = data._id;
+        delete data._id;
+        collection.update(
+          { '_id': new mongoDB.ObjectID(id) },
+          { $set: data },
+          function (err, items) {
+            if (err) {
+              callBack(false, err);
+            }
+            var logData = {
+              msg: '<strong>' + data.name + "</strong> is updated, by " + _session.getName(),
+              user: _session.getUserId()
+            };
+            $self.writeLogs(logData);
+            callBack(true, items);
+
+          });
+      }
+      else {
+        delete data.id;
+        collection.insert(data, function (err, items) {
+          if (err) {
+            callBack(false, err);
+          }
+          var logData = {
+            msg: '<strong>' + data.name + "</strong> is created, by " + _session.getName(),
+            user: _session.getUserId()
+          };
+          $self.writeLogs(logData);
+          callBack(true, { _id: items.ops[0]._id.toString() });
+        });
+      }
+    });
+  },
+
+  getPodOwnerDetails: function (callBack, _session) {
+
+
+    mongoDbObj.db.collection('podOwner', function (err, collection) {
+      collection.find({ "isDeleted": false }).toArray(function (err, items) {
+        if (err) {
+          callBack(false, err);
+        }
+        callBack(true, items);
+      });
+    });
+  },
+
+  deletePodOwner: function (data, callBack, _session) {
+    var $self = this;
+    mongoDbObj.db.collection('podOwner', function (err, collection) {
+      collection.update(
+        { '_id': new mongoDB.ObjectID(data._id) }, { $set: { "isDeleted": true } }, function (err, items) {
+          if (err) {
+            callBack(false, err);
+          }
+          var logData = {
+            msg: '<strong>' + data.name + "</strong> is deleted, by " + _session.getName(),
+            user: _session.getUserId()
+          };
+          $self.writeLogs(logData);
+          callBack(true, items);
+        });
+    });
+  },
+
+//pod
+  savePod: function (data, callBack,_session) {
+    var $self = this;
+    mongoDbObj.db.collection('pods', function (err, collection) {
+      if (data._id) {
+        var id = data._id;
+        delete data._id;
+        collection.update(
+          {'_id': new mongoDB.ObjectID(id)},
+          {$set: data},
+          function (err, items) {
+            if (err) {
+              callBack(false, err);
+            }
+            var logData = {
+              msg: '<strong>'+ data.name +"</strong> is updated, by "+ _session.getName(),
+              user: _session.getUserId()
+            };
+            $self.writeLogs(logData);
+            callBack(true, items);
+
+          });
+      }
+      else {
+        delete data.id;
+        collection.insert(data, function (err, items) {
+          if (err) {
+            callBack(false, err);
+          }
+          var logData = {
+            msg: '<strong>'+ data.name +"</strong> is created, by "+ _session.getName(),
+            user: _session.getUserId()
+          };
+          $self.writeLogs(logData);
+          callBack(true, { _id: items.ops[0]._id.toString()});
+        });
+      }
+    });
+  },
+
+  getPodDetails: function (callBack, _session) {
+
+
+    mongoDbObj.db.collection('pods', function (err, collection) {
+      collection.find({ "isDeleted": false }).toArray(function (err, items) {
+        if (err) {
+          callBack(false, err);
+        }
+        callBack(true, items);
+      });
+    });
+  },
+
+  deletePod: function (data, callBack,_session) {
+    var $self = this;
+    mongoDbObj.db.collection('pods', function (err, collection) {
+      collection.update(
+        {'_id': new mongoDB.ObjectID(data._id)}, {$set: {"isDeleted": true}}, function (err, items) {
+          if (err) {
+            callBack(false, err);
+          }
+          var logData = {
+            msg: '<strong>'+ data.name +"</strong> is deleted, by "+ _session.getName(),
+            user: _session.getUserId()
+          };
+          $self.writeLogs(logData);
+          callBack(true, items);
+        });
+    });
+  },
+
+  //bed
+  saveBed: function (data, callBack,_session) {
+    var $self = this;
+    mongoDbObj.db.collection('beds', function (err, collection) {
+      if (data._id) {
+        var id = data._id;
+        delete data._id;
+        collection.update(
+          {'_id': new mongoDB.ObjectID(id)},
+          {$set: data},
+          function (err, items) {
+            if (err) {
+              callBack(false, err);
+            }
+            var logData = {
+              msg: '<strong>'+ data.name +"</strong> is updated, by "+ _session.getName(),
+              user: _session.getUserId()
+            };
+            $self.writeLogs(logData);
+            callBack(true, items);
+
+          });
+      }
+      else {
+        delete data.id;
+        collection.insert(data, function (err, items) {
+          if (err) {
+            callBack(false, err);
+          }
+          var logData = {
+            msg: '<strong>'+ data.name +"</strong> is created, by "+ _session.getName(),
+            user: _session.getUserId()
+          };
+          $self.writeLogs(logData);
+          callBack(true, { _id: items.ops[0]._id.toString()});
+        });
+      }
+    });
+  },
+
+  getBedDetails: function (callBack, _session) {
+
+
+    mongoDbObj.db.collection('beds', function (err, collection) {
+      collection.find({ "isDeleted": false }).toArray(function (err, items) {
+        if (err) {
+          callBack(false, err);
+        }
+        callBack(true, items);
+      });
+    });
+  },
+
+  deleteBed: function (data, callBack,_session) {
+    var $self = this;
+    mongoDbObj.db.collection('beds', function (err, collection) {
       collection.update(
         {'_id': new mongoDB.ObjectID(data._id)}, {$set: {"isDeleted": true}}, function (err, items) {
           if (err) {

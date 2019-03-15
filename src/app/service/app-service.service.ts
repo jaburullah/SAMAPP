@@ -5,6 +5,12 @@ import {SessionModel} from '../model/Session';
 import {switchMap, tap} from 'rxjs/internal/operators';
 import {Router} from '@angular/router';
 import {Appartement} from '../model/AppartmentModel';
+import {FarmOwner} from '../model/FarmOwnerModel';
+import {Farm} from '../model/FarmModel';
+import {Seed} from '../model/SeedModel';
+import {PodOwner} from '../model/PodOwnerModel';
+import {Pod} from '../model/PodModel';
+import {Bed} from '../model/BedModel';
 import {environment} from '../../environments/environment.prod';
 
 // import 'rxjs/add/operator/toPromise';
@@ -26,10 +32,22 @@ export class AppServiceService {
   // rootURL = 'https://samappartement.herokuapp.com/';
   appInfo;
   appartement: Appartement[] = [];
+  farmOwner: FarmOwner[] = [];
+  farm: Farm[] = [];
+  seed: Seed[] = [];
+  podOwner: PodOwner[] = [];
+  pod: Pod[] = [];
+  bed: Bed[] = [];
   manager: any[] = [];
   tenant: any[] = [];
   ticket: any[] = [];
   selectedAppartementIndex: number;
+  selectedFarmOwnerIndex: number;
+  selectedFarmIndex: number;
+  selectedSeedIndex: number;
+  selectedPodOwnerIndex: number;
+  selectedPodIndex: number;
+  selectedBedIndex: number;
   selectedManagerIndex: number;
   selectedTenantIndex: number;
   selectedTicketIndex: number;
@@ -37,7 +55,7 @@ export class AppServiceService {
     // if (true) {
       this.rootURL = document.location.origin + '/';
     // } else {
-    //   this.rootURL = 'http://localhost:8084/';
+      this.rootURL = 'http://localhost:8084/';
     // }
     console.log(document.location.origin);
   }
@@ -104,6 +122,150 @@ export class AppServiceService {
 
   deleteAppartement(data): Observable<Response[]> {
     return this.http.post<Response>(`${this.rootURL}deleteAppartement?session=${this.session.getHashKey()}`, data).pipe(
+      switchMap(res => this.callBack(res, null))
+    );
+  }
+
+  saveFarmOwner(data): Observable<any> {
+    return this.http.post<Response>(`${this.rootURL}saveFarmOwner?session=${this.session.getHashKey()}`, data).pipe(
+      switchMap(res => this.callBack(res, null))
+    );
+  }
+
+  getFarmOwner(): Observable<any> {
+    if (this.farmOwner.length === 0) {
+      return this.http.get<any>(`${this.rootURL}farmOwnerDetails?session=${this.session.getHashKey()}`).pipe(
+        switchMap((res) => {
+          return this.callBack(res, 'farmOwner');
+        })
+      );
+    } else {
+      return of(this.farmOwner);
+    }
+  }
+
+  deleteFarmOwner(data): Observable<Response[]> {
+    return this.http.post<Response>(`${this.rootURL}deleteFarmOwner?session=${this.session.getHashKey()}`, data).pipe(
+      switchMap(res => this.callBack(res, null))
+    );
+  }
+
+  saveFarm(data): Observable<any> {
+    return this.http.post<Response>(`${this.rootURL}saveFarm?session=${this.session.getHashKey()}`, data).pipe(
+      switchMap(res => this.callBack(res, null))
+    );
+  }
+
+  getFarm(): Observable<any> {
+    if (this.farm.length === 0) {
+      return this.http.get<any>(`${this.rootURL}farmDetails?session=${this.session.getHashKey()}`).pipe(
+        switchMap((res) => {
+          return this.callBack(res, 'farm');
+        })
+      );
+    } else {
+      return of(this.farm);
+    }
+  }
+
+  deleteFarm(data): Observable<Response[]> {
+    return this.http.post<Response>(`${this.rootURL}deleteFarm?session=${this.session.getHashKey()}`, data).pipe(
+      switchMap(res => this.callBack(res, null))
+    );
+  }
+
+  saveSeed(data): Observable<any> {
+    return this.http.post<Response>(`${this.rootURL}saveSeed?session=${this.session.getHashKey()}`, data).pipe(
+      switchMap(res => this.callBack(res, null))
+    );
+  }
+
+  getSeed(): Observable<any> {
+    if (this.seed.length === 0) {
+      return this.http.get<any>(`${this.rootURL}SeedDetails?session=${this.session.getHashKey()}`).pipe(
+        switchMap((res) => {
+          return this.callBack(res, 'seed');
+        })
+      );
+    } else {
+      return of(this.seed);
+    }
+  }
+
+  deleteSeed(data): Observable<Response[]> {
+    return this.http.post<Response>(`${this.rootURL}deleteSeed?session=${this.session.getHashKey()}`, data).pipe(
+      switchMap(res => this.callBack(res, null))
+    );
+  }
+
+  savePodOwner(data): Observable<any> {
+    return this.http.post<Response>(`${this.rootURL}savePodOwner?session=${this.session.getHashKey()}`, data).pipe(
+      switchMap(res => this.callBack(res, null))
+    );
+  }
+
+  getPodOwner(): Observable<any> {
+    if (this.podOwner.length === 0) {
+      return this.http.get<any>(`${this.rootURL}podOwnerDetails?session=${this.session.getHashKey()}`).pipe(
+        switchMap((res) => {
+          return this.callBack(res, 'podOwner');
+        })
+      );
+    } else {
+      return of(this.podOwner);
+    }
+  }
+
+  deletePodOwner(data): Observable<Response[]> {
+    return this.http.post<Response>(`${this.rootURL}deletePodOwner?session=${this.session.getHashKey()}`, data).pipe(
+      switchMap(res => this.callBack(res, null))
+    );
+  }
+
+  savePod(data): Observable<any> {
+    return this.http.post<Response>(`${this.rootURL}savePod?session=${this.session.getHashKey()}`, data).pipe(
+      switchMap(res => this.callBack(res, null))
+    );
+  }
+
+  getPod(): Observable<any> {
+    if (this.pod.length === 0) {
+      return this.http.get<any>(`${this.rootURL}podDetails?session=${this.session.getHashKey()}`).pipe(
+        switchMap((res) => {
+          return this.callBack(res, 'pod');
+        })
+      );
+    } else {
+      return of(this.pod);
+    }
+  }
+
+  deletePod(data): Observable<Response[]> {
+    return this.http.post<Response>(`${this.rootURL}deletePod?session=${this.session.getHashKey()}`, data).pipe(
+      switchMap(res => this.callBack(res, null))
+    );
+  }
+
+  saveBed(data): Observable<any> {
+    return this.http.post<Response>(`${this.rootURL}saveBed?session=${this.session.getHashKey()}`, data).pipe(
+      switchMap(res => this.callBack(res, null))
+    );
+  }
+
+  getBed(): Observable<any> {
+    if (this.bed.length === 0) {
+      return this.http.get<any>(`${this.rootURL}bedDetails?session=${this.session.getHashKey()}`).pipe(
+        switchMap((res) => {
+          return this.callBack(res, 'bed');
+        })
+      );
+    } else {
+      return of(this.bed);
+    }
+  }
+
+  deleteBed(data): Observable<Response[]> {
+    return this.http.post<Response>(`${this.rootURL}deleteBed?session=${this.session.getHashKey()}`, data).pipe(
       switchMap(res => this.callBack(res, null))
     );
   }
